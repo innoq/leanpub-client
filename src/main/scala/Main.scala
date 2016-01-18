@@ -1,6 +1,7 @@
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
 
 import scala.concurrent.Future
@@ -22,11 +23,17 @@ object Main extends App {
     Http().singleRequest(HttpRequest(uri=url))
   }
   
-  Await.result(responseFuture("http://headers.jsontest.com/"), 10.second)
+  Await.result(responseFuture("http://jsonplaceholder.typicode.com/posts/1"), 10.second)
 
-  responseFuture("http://headers.jsontest.com/").onComplete {
+  responseFuture("http://jsonplaceholder.typicode.com/posts/1").onComplete {
     case Success(response) => 
-      println(s"this is the response: ${response.entity}")
+      response.status match {
+        case StatusCodes.OK => 
+          println(response.status)
+          println(s"this is the response:" + Unmarshal(response.entity).to[String])
+        case _ => 
+          println("Error!!! " + response.status)
+      }
       system.shutdown()
     case Failure(e) => 
       println(s"Error-message $e")
