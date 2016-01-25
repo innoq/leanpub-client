@@ -15,5 +15,6 @@ object Main extends App {
 
   val client = new LeanPubClient(http, sys.env.getOrElse("LEANPUB_API_KEY", ""))
   Await.result(client.triggerPreview("notabook77"), 5.seconds)
+  Await.result(client.triggerPublish("notabook77", Some("hello World")), 5.seconds)
   http.shutdownAllConnectionPools() andThen { case _ => system.shutdown() }
 }

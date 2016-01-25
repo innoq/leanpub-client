@@ -21,4 +21,21 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     }
   }
 
+  def triggerPublish(slug: String, emailText: Option[String]): Future[Unit] = {
+    val request: HttpRequest = emailText match {
+      case Some(text) => HttpRequest( uri=s"$host/$slug/publish.json",
+                                      method=HttpMethods.POST,
+                                      entity=FormData("api_key" -> apiKey, "publish[email_readers]" -> "true", "publish[release_notes]" -> text).toEntity )
+      case None => HttpRequest( uri=s"$host/$slug/publish.json",
+                                method=HttpMethods.POST,
+                                entity=FormData("api_key" -> apiKey).toEntity )
+    }
+    http.singleRequest(request).flatMap { response =>
+      response.status match {
+        case StatusCodes.OK => Future.successful(())
+        case code => Future.failed(new RuntimeException(s"Request to $host failed, Statuscode: $code"))
+      }
+    }
+  }
+
 }
