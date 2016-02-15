@@ -7,7 +7,8 @@ val akkaHttpVersion = "2.0.1"
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http-core-experimental" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-stream-experimental" % akkaHttpVersion,
-  "com.typesafe.akka" %% "akka-http-experimental" % akkaHttpVersion
+  "com.typesafe.akka" %% "akka-http-experimental" % akkaHttpVersion,
+  "commons-codec" % "commons-codec" % "1.10"
 )
 
 cancelable in Global := true
