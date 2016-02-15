@@ -19,7 +19,7 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     http.singleRequest(request).flatMap(handleResponseToPost)
   }
 
-  private def get(uri: Uri): Future[Unit] = {
+  private def get(uri: Uri): Future[ResponseEntity] = {
     val request = HttpRequest(uri = uri, method = HttpMethods.GET, entity = FormData("api_key" -> apiKey).toEntity)
     http.singleRequest(request).flatMap(handleResponseToGet)
   }
