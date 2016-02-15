@@ -64,19 +64,19 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     post(Uri(s"$host/$slug/coupons.json"), formParams)
   }
 
-  def getCoupons(slug: String): Future[Unit] = {
+  def getCoupons(slug: String): Future[ResponseEntity] = {
     get(Uri(s"$host/$slug/coupons.json"))
   }
 
-  def getSummary(slug: String): Future[Unit] = {
+  def getSummary(slug: String): Future[ResponseEntity] = {
     get(Uri(s"$host/$slug.json"))
   }
 
-  def getSales(slug: String): Future[Unit] = {
+  def getSales(slug: String): Future[ResponseEntity] = {
     get(Uri(s"$host/$slug/sales.json"))
   }
 
-  def getIndividualPurchases(slug: String): Future[Unit] = {
+  def getIndividualPurchases(slug: String): Future[ResponseEntity] = {
     get(Uri(s"$host/$slug/individual_purchases.json"))
   }
 }
