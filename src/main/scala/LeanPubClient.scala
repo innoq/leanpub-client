@@ -38,4 +38,28 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     }
   }
 
+  def get(uri: String): Future[Unit] = {
+    http.singleRequest(HttpRequest(uri=uri, method=HttpMethods.GET, entity=FormData("api_key" -> apiKey).toEntity)).flatMap { response =>
+      response.status match {
+        case StatusCodes.OK => Future.successful(response.entity)
+        case code => Future.failed(new RuntimeException(s"Request to $host failed, Statuscode: $code"))
+      }
+    }
+  }
+
+  def getCoupons(slug: String): Future[Unit] = {
+    get(s"$host/$slug/coupons.json")
+  }
+
+  def getSummary(slug: String): Future[Unit] = {
+    get(s"$host/$slug.json")
+  }
+
+  def getSales(slug: String): Future[Unit] = {
+    get(s"$host/$slug/sales.json")
+  }
+
+  def getIndividualPurchases(slug: String): Future[Unit] = {
+    get(s"$host/$slug/individual_purchases.json")
+  }
 }
