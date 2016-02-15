@@ -1,6 +1,9 @@
 import akka.http.scaladsl.HttpExt
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
+import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
+import play.api.libs.json.JsValue
 
 import scala.concurrent.{ExecutionContext, Future}
 import org.apache.commons.codec.net.URLCodec
@@ -8,7 +11,7 @@ import org.apache.commons.codec.net.URLCodec
 /**
   * Created by tina on 25.01.16.
   */
-class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materializer, executionContext: ExecutionContext) {
+class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materializer, executionContext: ExecutionContext) extends PlayJsonSupport {
 
   val host: String = "https://leanpub.com"
   val urlCodec: URLCodec = new URLCodec()
@@ -16,24 +19,24 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
   private def post(uri: Uri, formParams: Map[String, String] = Map.empty): Future[Unit] = {
     val formData = FormData(formParams + ("api_key" -> apiKey))
     val request = HttpRequest(uri = uri, method = HttpMethods.POST, entity = formData.toEntity)
-    http.singleRequest(request).flatMap(handleResponseToPost)
+    http.singleRequest(request).flatMap { response => handleResponseToPost(uri, response) }
   }
 
-  private def get(uri: Uri): Future[ResponseEntity] = {
+  private def get(uri: Uri): Future[JsValue] = {
     val request = HttpRequest(uri = uri, method = HttpMethods.GET, entity = FormData("api_key" -> apiKey).toEntity)
-    http.singleRequest(request).flatMap(handleResponseToGet)
+    http.singleRequest(request).flatMap { response => handleResponseToGet(uri, response) }
   }
 
-  private def handleResponseToPost(response: HttpResponse): Future[Unit] = {
+  private def handleResponseToPost(uri: Uri, response: HttpResponse): Future[Unit] = {
     response.status match {
       case StatusCodes.OK => Future.successful(())
-      case code => Future.failed(new RuntimeException(s"Request to $host failed, Statuscode: $code"))
+      case code => Future.failed(new RuntimeException(s"Request to $uri failed, Statuscode: $code"))
     }
   }
 
-  private def handleResponseToGet(response: HttpResponse): Future[ResponseEntity] = {
+  private def handleResponseToGet(uri: Uri, response: HttpResponse): Future[JsValue] = {
     response.status match {
-      case StatusCodes.OK => Future.successful(response.entity)
+      case StatusCodes.OK => Unmarshal(response.entity).to[JsValue]
       case code => Future.failed(new RuntimeException(s"Request to $host failed, Statuscode: $code"))
     }
   }
@@ -64,19 +67,19 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     post(Uri(s"$host/$slug/coupons.json"), formParams)
   }
 
-  def getCoupons(slug: String): Future[ResponseEntity] = {
+  def getCoupons(slug: String): Future[JsValue] = {
     get(Uri(s"$host/$slug/coupons.json"))
   }
 
-  def getSummary(slug: String): Future[ResponseEntity] = {
+  def getSummary(slug: String): Future[JsValue] = {
     get(Uri(s"$host/$slug.json"))
   }
 
-  def getSales(slug: String): Future[ResponseEntity] = {
+  def getSales(slug: String): Future[JsValue] = {
     get(Uri(s"$host/$slug/sales.json"))
   }
 
-  def getIndividualPurchases(slug: String): Future[ResponseEntity] = {
+  def getIndividualPurchases(slug: String): Future[JsValue] = {
     get(Uri(s"$host/$slug/individual_purchases.json"))
   }
 }
