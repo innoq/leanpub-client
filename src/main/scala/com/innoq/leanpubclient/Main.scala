@@ -1,3 +1,5 @@
+package com.innoq.leanpubclient
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
@@ -20,4 +22,5 @@ object Main extends App {
   val response = client.getSummary("notabook77")
   println(Json.prettyPrint(Await.result(response, 5.seconds)))
   http.shutdownAllConnectionPools() andThen { case _ => system.shutdown() }
+
 }

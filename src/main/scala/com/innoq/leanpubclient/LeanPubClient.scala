@@ -1,12 +1,14 @@
+package com.innoq.leanpubclient
+
 import akka.http.scaladsl.HttpExt
+import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.Materializer
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
+import org.apache.commons.codec.net.URLCodec
 import play.api.libs.json.JsValue
 
 import scala.concurrent.{ExecutionContext, Future}
-import org.apache.commons.codec.net.URLCodec
 
 /**
   * Created by tina on 25.01.16.
@@ -23,23 +25,12 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
   }
 
   private def get(uri: Uri): Future[JsValue] = {
-    val request = HttpRequest(uri = uri, method = HttpMethods.GET, entity = FormData("api_key" -> apiKey).toEntity)
+    val query = Query("api_key" -> apiKey)
+    val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.GET)
     http.singleRequest(request).flatMap { response => handleResponseToGet(uri, response) }
   }
 
-  private def handleResponseToPost(uri: Uri, response: HttpResponse): Future[Unit] = {
-    response.status match {
-      case StatusCodes.OK => Future.successful(())
-      case code => Future.failed(new RuntimeException(s"Request to $uri failed, Statuscode: $code"))
-    }
-  }
 
-  private def handleResponseToGet(uri: Uri, response: HttpResponse): Future[JsValue] = {
-    response.status match {
-      case StatusCodes.OK => Unmarshal(response.entity).to[JsValue]
-      case code => Future.failed(new RuntimeException(s"Request to $host failed, Statuscode: $code"))
-    }
-  }
 
   def triggerPreview(slug: String): Future[Unit] = post(Uri(s"$host/$slug/preview.json"))
 
