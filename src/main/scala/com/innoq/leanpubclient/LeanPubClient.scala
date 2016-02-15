@@ -4,16 +4,16 @@ import akka.http.scaladsl.HttpExt
 import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
 import akka.stream.Materializer
-import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
 import org.apache.commons.codec.net.URLCodec
 import play.api.libs.json.JsValue
 
 import scala.concurrent.{ExecutionContext, Future}
+import ResponseHandler._
 
 /**
   * Created by tina on 25.01.16.
   */
-class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materializer, executionContext: ExecutionContext) extends PlayJsonSupport {
+class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materializer, executionContext: ExecutionContext) {
 
   val host: String = "https://leanpub.com"
   val urlCodec: URLCodec = new URLCodec()
