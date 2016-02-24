@@ -30,8 +30,6 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     http.singleRequest(request).flatMap { response => handleResponseToGet(uri, response) }
   }
 
-
-
   def triggerPreview(slug: String): Future[Unit] = post(Uri(s"$host/$slug/preview.json"))
 
   def triggerPublish(slug: String, emailText: Option[String]): Future[Unit] = {
