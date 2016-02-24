@@ -1,14 +1,13 @@
 package com.innoq.leanpubclient
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.{Uri, StatusCodes, HttpResponse}
+import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
 import org.scalatest.WordSpec
 import org.scalatest.concurrent.ScalaFutures
+import play.api.libs.json.JsObject
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 
 /**
   * Created by tina on 15.02.16.
@@ -26,7 +25,47 @@ class ResponseHandlerSpec extends WordSpec with ScalaFutures {
           val response = HttpResponse(status = StatusCodes.OK)
           val uri = Uri("http://example.com")
           val resultF = ResponseHandler.handleResponseToPost(uri, response)
-          Await.result(resultF, 1.second)
+          assert(resultF.isCompleted)
+        }
+      }
+    }
+  }
+
+  "The Response Handler" when {
+    "handling a POST response" which {
+      "has a status code 404" should {
+        "return a failed Future containing a RunTimeException" in {
+          val response = HttpResponse(status = StatusCodes.NotFound)
+          val uri = Uri("http://example.com")
+          val resultF = ResponseHandler.handleResponseToPost(uri, response)
+          assert(resultF.failed.futureValue.isInstanceOf[RuntimeException])
+        }
+      }
+    }
+  }
+
+  "The Response Handler" when {
+    "handling a GET response" which {
+      "has a status code 200" should {
+        "return a successful Future[JsValue]" in {
+          val entityValue = JsObject(Seq.empty)
+          val response = HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, entityValue.toString()))
+          val uri = Uri("http://example.com")
+          val resultF = ResponseHandler.handleResponseToGet(uri, response)
+          assert(resultF.futureValue == JsObject(Seq.empty))
+        }
+      }
+    }
+  }
+
+  "The Response Handler" when {
+    "handling a GET response" which {
+      "has a status code 404" should {
+        "return a failed Future containing a RunTimeException" in {
+          val response = HttpResponse(status = StatusCodes.NotFound)
+          val uri = Uri("http://example.com")
+          val resultF = ResponseHandler.handleResponseToGet(uri, response)
+          intercept[RuntimeException](resultF.futureValue)
         }
       }
     }
