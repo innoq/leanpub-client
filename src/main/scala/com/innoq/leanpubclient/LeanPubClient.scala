@@ -1,5 +1,7 @@
 package com.innoq.leanpubclient
 
+import java.time.{LocalDate, ZonedDateTime}
+
 import akka.http.scaladsl.HttpExt
 import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
@@ -43,17 +45,17 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
   def createCoupon(slug: String,
                    couponCode: String,
                    discountedPrice: Float,
-                   startDate: DateTime,
-                   endDate: DateTime,
-                   maxUses: Int = 0,
-                   note: String = ""): Future[Unit] = {
-    val formParams = Map("coupon[coupon_code]" -> urlCodec.encode(couponCode),
+                   startDate: LocalDate,
+                   endDate: Option[LocalDate] = None,
+                   maxUses: Option[Int] = None,
+                   note: Option[String] = None): Future[Unit] = {
+    /*val formParams = Map("coupon[coupon_code]" -> urlCodec.encode(couponCode),
                          "coupon[package_discounts_attributes]" -> Array(s"{package_slug: $slug, discounted_price: $discountedPrice}").toString,
                          "coupon[start_date]" -> urlCodec.encode(startDate.toIsoDateString),
                          "coupon[end_date]" -> urlCodec.encode(endDate.toIsoDateString),
                          "coupn[max_uses]" -> urlCodec.encode(maxUses.toString),
-                         "coupon[note]" -> urlCodec.encode(note))
-    post(Uri(s"$host/$slug/coupons.json"), formParams)
+                         "coupon[note]" -> urlCodec.encode(note)*/)
+    post(Uri(s"$host/$slug/coupons.json"), Map.empty)
   }
 
   def getCoupons(slug: String): Future[JsValue] = {
