@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
 import akka.stream.Materializer
 import org.apache.commons.codec.net.URLCodec
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsResult, JsError, JsSuccess, JsValue}
 
 import scala.concurrent.{ExecutionContext, Future}
 import ResponseHandler._
@@ -60,8 +60,8 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     get(Uri(s"$host/$slug/coupons.json"))
   }
 
-  def getSummary(slug: String): Future[JsValue] = {
-    get(Uri(s"$host/$slug.json"))
+  def getSummary(slug: String): Future[BookInfo] = {
+    get(Uri(s"$host/$slug.json")).map { json => json.as[BookInfo] }
   }
 
   def getSales(slug: String): Future[JsValue] = {
