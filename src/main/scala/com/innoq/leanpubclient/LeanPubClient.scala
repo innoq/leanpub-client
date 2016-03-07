@@ -54,12 +54,12 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
                          "coupon[start_date]" -> urlCodec.encode(startDate.toIsoDateString),
                          "coupon[end_date]" -> urlCodec.encode(endDate.toIsoDateString),
                          "coupn[max_uses]" -> urlCodec.encode(maxUses.toString),
-                         "coupon[note]" -> urlCodec.encode(note)*/)
+                         "coupon[note]" -> urlCodec.encode(note))*/
     post(Uri(s"$host/$slug/coupons.json"), Map.empty)
   }
 
-  def getCoupons(slug: String): Future[JsValue] = {
-    get(Uri(s"$host/$slug/coupons.json"))
+  def getCoupons(slug: String): Future[List[Coupon]] = {
+    get(Uri(s"$host/$slug/coupons.json")).map { json => json.as[List[Coupon]]}
   }
 
   def getSummary(slug: String): Future[BookInfo] = {
