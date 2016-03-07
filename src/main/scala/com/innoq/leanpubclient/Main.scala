@@ -19,8 +19,9 @@ object Main extends App {
   val client = new LeanPubClient(http, sys.env("LEANPUB_API_KEY"))
   //Await.result(client.triggerPreview("notabook77"), 5.seconds)
   //Await.result(client.triggerPublish("notabook77", Some("hello World")), 5.seconds)
-  val response = client.getSummary("notabook77")
-  println(Json.prettyPrint(Await.result(response, 5.seconds)))
+  val response = client.getCoupons("notabook77")
+  //println(Json.prettyPrint(Await.result(response, 5.seconds)))
+  println(response)
   http.shutdownAllConnectionPools() andThen { case _ => system.shutdown() }
 
 }
