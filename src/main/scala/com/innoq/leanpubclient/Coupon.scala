@@ -25,7 +25,7 @@ object Coupon {
         (JsPath \ "created_at").read[ZonedDateTime] and
         //(JsPath \ "package_discounts").read[]
         (JsPath \ "end_date").read[ZonedDateTime] and
-        (JsPath\ "max_uses").read[Option[Int]] and
+        (JsPath\ "max_uses").readNullable[Int] and
         (JsPath \ "note").read[String] and
         (JsPath \ "num_uses").read[Int] and
         (JsPath \ "start_date").read[ZonedDateTime] and
