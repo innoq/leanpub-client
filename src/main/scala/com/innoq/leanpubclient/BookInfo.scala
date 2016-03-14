@@ -36,27 +36,7 @@ object BookInfo {
                    mobiPublished: String
                   )
 
-  val fields1to16: Reads[(String, String, String, String, ZonedDateTime, Option[String], Int, Int, Int, BigDecimal,
-    Int, Int, String, BigDecimal, BigDecimal, Int)] = (
-      (JsPath \ "slug").read[String] and
-      (JsPath \ "subtitle").read[String] and
-      (JsPath \ "title").read[String] and
-      (JsPath \ "about_the_book").read[String] and
-      (JsPath \ "last_published_at").read[ZonedDateTime] and
-      (JsPath \ "meta_description").readNullable[String] and
-      (JsPath \ "page_count").read[Int] and
-      (JsPath \ "page_count_published").read[Int] and
-      (JsPath \ "total_copies_sold").read[Int] and
-      (JsPath \ "total_revenue").read[BigDecimal] and
-      (JsPath \ "word_count").read[Int] and
-      (JsPath \ "word_count_published").read[Int] and
-      (JsPath \ "author_string").read[String] and
-      (JsPath \ "minimum_price").read[BigDecimal] and
-      (JsPath \ "suggested_price").read[BigDecimal] and
-      (JsPath \ "possible_reader_count").read[Int]
-    ).tupled
-
-  val linksReads: Reads[(String, String, String, String, String, String, String, String, String)] = (
+  implicit val linksReads: Reads[BookInfo.Links] = (
     (JsPath \ "url").read[String] and
       (JsPath \ "title_page_url").read[String] and
       (JsPath \ "image").read[String] and
@@ -66,7 +46,7 @@ object BookInfo {
       (JsPath \ "pdf_published_url").read[String] and
       (JsPath \ "epub_published_url").read[String] and
       (JsPath \ "mobi_published_url").read[String]
-    ).tupled
+    ) (BookInfo.Links.apply _)
 
   implicit val bookInfoReads: Reads[BookInfo] = new Reads[BookInfo] {
     override def reads(json: JsValue): JsResult[BookInfo] = for {
@@ -85,12 +65,13 @@ object BookInfo {
       author <- (json \ "author_string").validate[String]
       minimumPrice <- (json \ "minimum_price").validate[BigDecimal]
       suggestedPrice <- (json \ "suggested_price").validate[BigDecimal]
-      links <- linksReads
+      possibleReaderCount <- (json \ "possible_reader_count").validate[Int]
+      links <- json.validate[BookInfo.Links]
     } yield BookInfo(slug = slug, subtitle = subtitle, title = title, about = about, lastPublishedAt = lastPublishedAt,
                     metaDescription = metaDescription, pageCount = pageCount, pageCountPublished = pageCountPublished,
                     totalCopiesSold = totalCopiesSold, totalRevenue = totalRevenue, wordCount = wordCount,
                     wordCountPublished = wordCountPublished, author = author, minimumPrice = minimumPrice,
-                    suggestedPrice = suggestedPrice, links = links
+                    suggestedPrice = suggestedPrice, possibleReaderCount = possibleReaderCount, links = links
                     )
   }
 }
