@@ -7,7 +7,7 @@ import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
 import akka.stream.Materializer
 import org.apache.commons.codec.net.URLCodec
-import play.api.libs.json.{JsResult, JsError, JsSuccess, JsValue}
+import play.api.libs.json._
 
 import scala.concurrent.{ExecutionContext, Future}
 import ResponseHandler._
@@ -24,6 +24,10 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     val formData = FormData(formParams + ("api_key" -> apiKey))
     val request = HttpRequest(uri = uri, method = HttpMethods.POST, entity = formData.toEntity)
     http.singleRequest(request).flatMap { response => handleResponseToPost(uri, response) }
+  }
+
+  private def postJson[A](uri: Uri, a: A)(implicit writes: Writes[A]): Future[Unit] = {
+    ???
   }
 
   private def get(uri: Uri): Future[JsValue] = {
@@ -59,7 +63,7 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
   }
 
   def getCoupons(slug: String): Future[List[Coupon]] = {
-    get(Uri(s"$host/$slug/coupons.json")).map { json => json.as[List[Coupon]]}
+    get(Uri(s"$host/$slug/coupons.json")).map { json => json.as[List[Coupon]] }
   }
 
   def getSummary(slug: String): Future[BookInfo] = {
