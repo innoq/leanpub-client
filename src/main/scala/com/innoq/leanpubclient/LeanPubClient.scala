@@ -6,6 +6,7 @@ import akka.http.scaladsl.HttpExt
 import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
 import akka.stream.Materializer
+import akka.util.ByteString
 import org.apache.commons.codec.net.URLCodec
 import play.api.libs.json._
 
@@ -24,10 +25,15 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     val formData = FormData(formParams + ("api_key" -> apiKey))
     val request = HttpRequest(uri = uri, method = HttpMethods.POST, entity = formData.toEntity)
     http.singleRequest(request).flatMap { response => handleResponseToPost(uri, response) }
+
   }
 
   private def postJson[A](uri: Uri, a: A)(implicit writes: Writes[A]): Future[Unit] = {
-    ???
+    val query = Query("api_key" -> apiKey)
+    val jsonString = Json.toJson(a).toString
+    val entity = HttpEntity.Strict(ContentTypes.`application/json`, ByteString(jsonString))
+    val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.POST, entity = entity)
+    http.singleRequest(request).flatMap { response => handleResponseToPost(uri, response) }
   }
 
   private def get(uri: Uri): Future[JsValue] = {
@@ -46,20 +52,8 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     post(Uri(s"$host/$slug/publish.json"), formParams)
   }
 
-  def createCoupon(slug: String,
-                   couponCode: String,
-                   discountedPrice: Float,
-                   startDate: LocalDate,
-                   endDate: Option[LocalDate] = None,
-                   maxUses: Option[Int] = None,
-                   note: Option[String] = None): Future[Unit] = {
-    /*val formParams = Map("coupon[coupon_code]" -> urlCodec.encode(couponCode),
-                         "coupon[package_discounts_attributes]" -> Array(s"{package_slug: $slug, discounted_price: $discountedPrice}").toString,
-                         "coupon[start_date]" -> urlCodec.encode(startDate.toIsoDateString),
-                         "coupon[end_date]" -> urlCodec.encode(endDate.toIsoDateString),
-                         "coupn[max_uses]" -> urlCodec.encode(maxUses.toString),
-                         "coupon[note]" -> urlCodec.encode(note))*/
-    post(Uri(s"$host/$slug/coupons.json"), Map.empty)
+  def createCoupon(coupon: Coupon): Future[Unit] = {
+    postJson(Uri(s"$host/${coupon.bookSlug}/coupons.json"), coupon)
   }
 
   def getCoupons(slug: String): Future[List[Coupon]] = {
