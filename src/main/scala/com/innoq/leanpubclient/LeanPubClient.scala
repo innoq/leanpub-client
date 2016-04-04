@@ -21,7 +21,7 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
   val host: String = "https://leanpub.com"
   val urlCodec: URLCodec = new URLCodec()
 
-  private def post(uri: Uri, formParams: Map[String, String] = Map.empty): Future[Unit] = {
+  private def postFormParams(uri: Uri, formParams: Map[String, String] = Map.empty): Future[Unit] = {
     val formData = FormData(formParams + ("api_key" -> apiKey))
     val request = HttpRequest(uri = uri, method = HttpMethods.POST, entity = formData.toEntity)
     http.singleRequest(request).flatMap { response => handleResponseToPost(uri, response) }
@@ -42,14 +42,14 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     http.singleRequest(request).flatMap { response => handleResponseToGet(uri, response) }
   }
 
-  def triggerPreview(slug: String): Future[Unit] = post(Uri(s"$host/$slug/preview.json"))
+  def triggerPreview(slug: String): Future[Unit] = postFormParams(Uri(s"$host/$slug/preview.json"))
 
   def triggerPublish(slug: String, emailText: Option[String]): Future[Unit] = {
     val formParams = emailText match {
       case Some(text) => Map("publish[email_readers]" -> "true", "publish[release_notes]" -> urlCodec.encode(text))
       case None => Map.empty[String, String]
     }
-    post(Uri(s"$host/$slug/publish.json"), formParams)
+    postFormParams(Uri(s"$host/$slug/publish.json"), formParams)
   }
 
   def createCoupon(coupon: Coupon): Future[Unit] = {
