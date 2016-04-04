@@ -44,5 +44,5 @@ object Coupon {
       (JsPath \ "suspended").write[Boolean] and
       (JsPath \ "updated_at").write[ZonedDateTime] and
       (JsPath \ "book_slug").write[String]
-    ) (Coupon.apply _)
+    ) (unlift(Coupon.unapply))
 }

@@ -13,5 +13,5 @@ object PackageDiscount {
   implicit val packageDiscountWrites: Writes[PackageDiscount] = (
       (JsPath \ "package_slug").write[String] and
       (JsPath \ "discounted_price").write[BigDecimal]
-    ) (PackageDiscount.apply _)
+    ) (unlift(PackageDiscount.unapply))
 }
