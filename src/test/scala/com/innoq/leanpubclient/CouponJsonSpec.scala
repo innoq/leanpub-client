@@ -12,7 +12,7 @@ class CouponJsonSpec extends WordSpec with TypeCheckedTripleEquals {
       "is valid and contains all Coupon Data" should {
         "return a Coupon Object with all fields" in {
           val json = """{
-            "coupon_code": "testarossa",
+            "coupon_code": "test",
             "created_at": "2012-01-01T12:00:00Z",
             "package_discounts": [
               {
