@@ -68,7 +68,7 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     get(Uri(s"$host/$slug/sales.json")).map { json => json.as[Sales] }
   }
 
-  def getIndividualPurchases(slug: String): Future[JsValue] = {
-    get(Uri(s"$host/$slug/individual_purchases.json"))
+  def getIndividualPurchases(slug: String): Future[List[IndividualPurchase]] = {
+    get(Uri(s"$host/$slug/individual_purchases.json")).map { json => json.as[List[IndividualPurchase]]}
   }
 }
