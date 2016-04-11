@@ -42,6 +42,12 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     http.singleRequest(request).flatMap { response => handleResponseToGet(uri, response) }
   }
 
+  private def getWithPagination(uri: Uri, page: Int): Future[JsValue] = {
+    val query = Query("api_key" -> apiKey, "page" -> page.toString)
+    val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.GET)
+    http.singleRequest(request).flatMap { response => handleResponseToGet(uri, response) }
+  }
+
   def triggerPreview(slug: String): Future[Unit] = postFormParams(Uri(s"$host/$slug/preview.json"))
 
   def triggerPublish(slug: String, emailText: Option[String]): Future[Unit] = {
@@ -68,7 +74,7 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     get(Uri(s"$host/$slug/sales.json")).map { json => json.as[Sales] }
   }
 
-  def getIndividualPurchases(slug: String): Future[List[IndividualPurchase]] = {
-    get(Uri(s"$host/$slug/individual_purchases.json")).map { json => json.as[List[IndividualPurchase]]}
+  def getIndividualPurchases(slug: String, page: Int = 1): Future[List[IndividualPurchase]] = {
+    getWithPagination(Uri(s"$host/$slug/individual_purchases.json"), page).map { json => json.as[List[IndividualPurchase]]}
   }
 }
