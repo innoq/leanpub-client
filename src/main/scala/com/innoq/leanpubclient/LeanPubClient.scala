@@ -1,12 +1,11 @@
 package com.innoq.leanpubclient
 
-import java.time.{LocalDate, ZonedDateTime}
-
 import akka.http.scaladsl.HttpExt
+import akka.http.scaladsl.marshalling.Marshal
+import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport._
 import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
 import akka.stream.Materializer
-import akka.util.ByteString
 import org.apache.commons.codec.net.URLCodec
 import play.api.libs.json._
 
@@ -25,15 +24,14 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     val formData = FormData(formParams + ("api_key" -> apiKey))
     val request = HttpRequest(uri = uri, method = HttpMethods.POST, entity = formData.toEntity)
     http.singleRequest(request).flatMap { response => handleResponseToPost(uri, response) }
-
   }
 
-  private def postJson[A](uri: Uri, a: A)(implicit writes: Writes[A]): Future[Unit] = {
+  private def sendJson[A](method: HttpMethod)(uri: Uri, a: A)(implicit writes: Writes[A]): Future[Unit] = {
     val query = Query("api_key" -> apiKey)
-    val jsonString = Json.toJson(a).toString
-    val entity = HttpEntity.Strict(ContentTypes.`application/json`, ByteString(jsonString))
-    val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.POST, entity = entity)
-    http.singleRequest(request).flatMap { response => handleResponseToPost(uri, response) }
+    Marshal(a).to[MessageEntity].flatMap { entity =>
+      val request = HttpRequest(uri = uri.withQuery(query), method = method, entity = entity)
+      http.singleRequest(request).flatMap { response => handleResponseToPost(uri, response) }
+    }
   }
 
   private def get(uri: Uri): Future[JsValue] = {
@@ -59,7 +57,11 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
   }
 
   def createCoupon(coupon: Coupon): Future[Unit] = {
-    postJson(Uri(s"$host/${coupon.bookSlug}/coupons.json"), coupon)
+    sendJson(HttpMethods.POST)(Uri(s"$host/${coupon.bookSlug}/coupons.json"), coupon)
+  }
+
+  def updateCoupon(slug: String, couponCode: String, coupon: Coupon): Future[Unit] = {
+    sendJson(HttpMethods.PUT)(Uri(s"$host/$slug/coupons/$couponCode.json"), coupon)
   }
 
   def getCoupons(slug: String): Future[List[Coupon]] = {
