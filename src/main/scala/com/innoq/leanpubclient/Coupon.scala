@@ -12,7 +12,7 @@ case class Coupon(couponCode: String,
                   note: Option[String],
                   numUses: Int,
                   startDate: LocalDate,
-                  suspended: Boolean = false,
+                  suspended: Boolean,
                   updatedAt: ZonedDateTime,
                   bookSlug: String
                  )
@@ -27,7 +27,7 @@ object Coupon {
       (JsPath \ "note").readNullable[String] and
       (JsPath \ "num_uses").read[Int] and
       (JsPath \ "start_date").read[LocalDate] and
-      (JsPath \ "suspended").read[Boolean] and
+      (JsPath \ "suspended").readNullable[Boolean].map(_.getOrElse(false)) and
       (JsPath \ "updated_at").read[ZonedDateTime] and
       (JsPath \ "book_slug").read[String]
     ) (Coupon.apply _)
