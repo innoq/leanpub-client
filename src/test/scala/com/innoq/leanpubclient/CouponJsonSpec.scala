@@ -39,7 +39,7 @@ class CouponJsonSpec extends WordSpec with TypeCheckedTripleEquals {
                                   createdAt = createdAt,
                                   packageDiscounts = List(PackageDiscount("book", 2.0)),
                                   endDate = Some(endDate),
-                                  Some(15),
+                                  maxUses = Some(15),
                                   note = Some("This is not a real coupon"),
                                   numUses = 12,
                                   startDate = startDate,
