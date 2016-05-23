@@ -43,7 +43,7 @@ class CouponJsonSpec extends WordSpec with TypeCheckedTripleEquals {
                                   note = Some("This is not a real coupon"),
                                   numUses = 12,
                                   startDate = startDate,
-                                  suspended = Some(false),
+                                  suspended = false,
                                   updatedAt = updatedAt,
                                   bookSlug = "yourbook"))
         }
@@ -82,7 +82,6 @@ class CouponJsonSpec extends WordSpec with TypeCheckedTripleEquals {
                                   note = None,
                                   numUses = 12,
                                   startDate = startDate,
-                                  suspended = None,
                                   updatedAt = updatedAt,
                                   bookSlug = "yourbook"))
         }
