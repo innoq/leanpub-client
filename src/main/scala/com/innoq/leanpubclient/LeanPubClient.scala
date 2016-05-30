@@ -46,10 +46,6 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     http.singleRequest(request).flatMap { response => handleResponseToGet(uri, response) }
   }
 
-  private def getPages(uri: Uri, page: Int): Future[JsValue] = {
-    ???
-  }
-
   def triggerPreview(slug: String): Future[Unit] = postFormParams(Uri(s"$host/$slug/preview.json"))
 
   def triggerPublish(slug: String, emailText: Option[String]): Future[Unit] = {
@@ -82,5 +78,15 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
 
   def getIndividualPurchases(slug: String, page: Int = 1): Future[List[IndividualPurchase]] = {
     getWithPagination(Uri(s"$host/$slug/individual_purchases.json"), page).map { json => json.as[List[IndividualPurchase]]}
+  }
+
+  def getAllIndividualPurchases(slug: String): Future[List[IndividualPurchase]] = {
+    def loop(count: Int, future: Future[List[IndividualPurchase]]): Future[List[IndividualPurchase]] = {
+      val purchasesList = future.map { individualPurchases =>
+        if(individualPurchases == List.empty) purchasesList
+        else loop(count + 1, getIndividualPurchases(slug, count))
+      }
+    }
+    loop(1, getIndividualPurchases(slug, 1))
   }
 }
