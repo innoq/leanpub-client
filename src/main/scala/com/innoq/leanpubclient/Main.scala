@@ -1,5 +1,7 @@
 package com.innoq.leanpubclient
 
+import java.time.LocalDate
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
@@ -19,7 +21,9 @@ object Main extends App {
   val client = new LeanPubClient(http, sys.env("LEANPUB_API_KEY"))
   //Await.result(client.triggerPreview("notabook77"), 5.seconds)
   //Await.result(client.triggerPublish("notabook77", Some("hello World")), 5.seconds)
-  val response = client.getSales("notabook77")
+  //val response = client.getSales("notabook77")
+  val coupon = CreateCoupon("test", List(PackageDiscount("book", 1.0)), LocalDate.of(2016, 7, 1))
+  val response = client.createCoupon("notabook77", coupon)
   println(Await.result(response, 5.seconds))
   //println(response)
   http.shutdownAllConnectionPools() andThen { case _ => system.shutdown() }

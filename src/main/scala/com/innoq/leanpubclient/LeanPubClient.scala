@@ -60,12 +60,12 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     postFormParams(Uri(s"$host/$slug/publish.json"), formParams)
   }
 
-  def createCoupon(coupon: Coupon): Future[Unit] = {
-    sendJson(HttpMethods.POST)(Uri(s"$host/${coupon.bookSlug}/coupons.json"), coupon)
+  def createCoupon(slug: String, coupon: CreateCoupon): Future[Unit] = {
+    sendJson(HttpMethods.POST)(Uri(s"$host/$slug/coupons.json"), coupon)
   }
 
-  def updateCoupon(slug: String, couponCode: String, couponUpdate: UpdateCoupon): Future[Unit] = {
-    sendJson(HttpMethods.PUT)(Uri(s"$host/$slug/coupons/$couponCode.json"), couponUpdate)
+  def updateCoupon(slug: String, couponCode: String, coupon: UpdateCoupon): Future[Unit] = {
+    sendJson(HttpMethods.PUT)(Uri(s"$host/$slug/coupons/$couponCode.json"), coupon)
   }
 
   def getCoupons(slug: String): Future[List[Coupon]] = {
