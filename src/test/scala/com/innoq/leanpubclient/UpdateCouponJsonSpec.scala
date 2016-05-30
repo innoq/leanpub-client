@@ -4,11 +4,11 @@ import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.WordSpec
 import play.api.libs.json._
 
-class CouponUpdateJsonSpec extends WordSpec with TypeCheckedTripleEquals {
+class UpdateCouponJsonSpec extends WordSpec with TypeCheckedTripleEquals {
 
-  "The CouponUpdate Class" when {
-    "writing JSON from a CouponUpdate object" which {
-      "contains some CouponUpdate data" should {
+  "The UpdateCoupon Class" when {
+    "writing JSON from a UpdateCoupon object" which {
+      "contains some UpdateCoupon data" should {
         "return valid Json" in {
           val json: JsValue = Json.parse(
             """{
@@ -17,12 +17,12 @@ class CouponUpdateJsonSpec extends WordSpec with TypeCheckedTripleEquals {
             "suspended": true
             }""")
 
-          val couponUpdate = CouponUpdate(maxUses = Some(50),
+          val updateCoupon = UpdateCoupon(maxUses = Some(50),
                                           note = Some("I changed something"),
                                           suspended = Some(true)
           )
 
-          assert(json === Json.toJson(couponUpdate))
+          assert(json === Json.toJson(updateCoupon))
         }
       }
     }

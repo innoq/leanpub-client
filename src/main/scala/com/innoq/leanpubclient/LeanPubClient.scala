@@ -46,6 +46,10 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     http.singleRequest(request).flatMap { response => handleResponseToGet(uri, response) }
   }
 
+  private def getPages(uri: Uri, page: Int): Future[JsValue] = {
+    ???
+  }
+
   def triggerPreview(slug: String): Future[Unit] = postFormParams(Uri(s"$host/$slug/preview.json"))
 
   def triggerPublish(slug: String, emailText: Option[String]): Future[Unit] = {
@@ -60,7 +64,7 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     sendJson(HttpMethods.POST)(Uri(s"$host/${coupon.bookSlug}/coupons.json"), coupon)
   }
 
-  def updateCoupon(slug: String, couponCode: String, couponUpdate: CouponUpdate): Future[Unit] = {
+  def updateCoupon(slug: String, couponCode: String, couponUpdate: UpdateCoupon): Future[Unit] = {
     sendJson(HttpMethods.PUT)(Uri(s"$host/$slug/coupons/$couponCode.json"), couponUpdate)
   }
 

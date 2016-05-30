@@ -7,7 +7,7 @@ import play.api.libs.json._
 /**
   * Created by tina on 23.05.16.
   */
-case class CouponUpdate(createdAt: Option[ZonedDateTime] = None,
+case class UpdateCoupon(createdAt: Option[ZonedDateTime] = None,
                         packageDiscounts: Option[List[PackageDiscount]] = None,
                         endDate: Option[LocalDate] = None,
                         maxUses: Option[Int] = None,
@@ -18,8 +18,8 @@ case class CouponUpdate(createdAt: Option[ZonedDateTime] = None,
                         updatedAt: Option[ZonedDateTime] = None,
                         bookSlug: Option[String] = None)
 
-object CouponUpdate {
-  implicit val couponUpdateWrites: Writes[CouponUpdate] = (
+object UpdateCoupon {
+  implicit val updateCouponWrites: Writes[UpdateCoupon] = (
     (JsPath \ "created_at").writeNullable[ZonedDateTime] and
       (JsPath \ "package_discounts").writeNullable[List[PackageDiscount]] and
       (JsPath \ "end_date").writeNullable[LocalDate] and
@@ -30,5 +30,5 @@ object CouponUpdate {
       (JsPath \ "suspended").writeNullable[Boolean] and
       (JsPath \ "updated_at").writeNullable[ZonedDateTime] and
       (JsPath \ "book_slug").writeNullable[String]
-    ) (unlift(CouponUpdate.unapply))
+    ) (unlift(UpdateCoupon.unapply))
 }
