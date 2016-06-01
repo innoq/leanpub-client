@@ -80,7 +80,7 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     getWithPagination(Uri(s"$host/$slug/individual_purchases.json"), page).map { json => json.as[List[IndividualPurchase]]}
   }
 
-  def getAllIndividualPurchases(slug: String): Future[List[IndividualPurchase]] = {
+/*  def getAllIndividualPurchases(slug: String): Future[List[IndividualPurchase]] = {
     def loop(count: Int, future: Future[List[IndividualPurchase]]): Future[List[IndividualPurchase]] = {
       val purchasesList = future.map { individualPurchases =>
         if(individualPurchases == List.empty) purchasesList
@@ -88,5 +88,5 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
       }
     }
     loop(1, getIndividualPurchases(slug, 1))
-  }
+  }*/
 }
