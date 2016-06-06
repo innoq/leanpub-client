@@ -88,7 +88,8 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
           Future(accu)
         }
         else {
-          loop(getIndividualPurchases(slug, count+1), accu, count+1).flatMap { response =>
+          val incrementCount = count + 1
+          loop(getIndividualPurchases(slug, incrementCount), accu, incrementCount).flatMap { response =>
             Future(response ::: accu)
           }
         }
