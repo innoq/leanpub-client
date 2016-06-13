@@ -92,7 +92,7 @@ class CouponJsonSpec extends WordSpec with TypeCheckedTripleEquals {
 
   "The Coupon Class" when {
     "reading JSON" which {
-      "is valid but lacks parts of Coupon Data" should {
+      "is valid but lacks required parts of Coupon Data" should {
         "throw a JsResultException" in {
           val json = """{
             "coupon_code": "test",
