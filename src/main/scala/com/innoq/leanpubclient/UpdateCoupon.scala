@@ -17,7 +17,7 @@ case class UpdateCoupon(packageDiscounts: Option[List[PackageDiscount]] = None,
 
 object UpdateCoupon {
   implicit val updateCouponWrites: Writes[UpdateCoupon] = (
-      (JsPath \ "package_discounts").writeNullable[List[PackageDiscount]] and
+      (JsPath \ "package_discounts_attributes").writeNullable[List[PackageDiscount]] and
       (JsPath \ "start_date").writeNullable[LocalDate] and
       (JsPath \ "end_date").writeNullable[LocalDate] and
       (JsPath \ "max_uses").writeNullable[Int] and
