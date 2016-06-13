@@ -18,7 +18,7 @@ case class CreateCoupon(couponCode: String,
 object CreateCoupon {
   implicit val couponWrites: Writes[CreateCoupon] = (
     (JsPath \ "coupon_code").write[String] and
-      (JsPath \ "package_discounts").write[List[PackageDiscount]] and
+      (JsPath \ "package_discounts_attributes").write[List[PackageDiscount]] and
       (JsPath \ "start_date").write[LocalDate] and
       (JsPath \ "end_date").writeNullable[LocalDate] and
       (JsPath \ "max_uses").writeNullable[Int] and
