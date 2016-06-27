@@ -18,7 +18,7 @@ class CreateCouponJsonSpec extends WordSpec with TypeCheckedTripleEquals {
           val json: JsValue = Json.parse(
             """{
                 "coupon_code": "test_coupon",
-                "package_discounts": [
+                "package_discounts_attributes": [
               {
                 "package_slug": "book",
                 "discounted_price": 2.0
@@ -44,7 +44,7 @@ class CreateCouponJsonSpec extends WordSpec with TypeCheckedTripleEquals {
 
           val json = Json.parse("""{
             "coupon_code": "test",
-            "package_discounts": [
+            "package_discounts_attributes": [
               {
                 "package_slug": "book",
                 "discounted_price": 2.0
