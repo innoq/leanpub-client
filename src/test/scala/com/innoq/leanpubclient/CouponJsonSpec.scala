@@ -44,8 +44,7 @@ class CouponJsonSpec extends WordSpec with TypeCheckedTripleEquals {
                                   numUses = 12,
                                   startDate = startDate,
                                   suspended = false,
-                                  updatedAt = updatedAt,
-                                  bookSlug = "yourbook"))
+                                  updatedAt = updatedAt))
         }
       }
     }
@@ -83,8 +82,7 @@ class CouponJsonSpec extends WordSpec with TypeCheckedTripleEquals {
                                   numUses = 12,
                                   startDate = startDate,
                                   suspended = false,
-                                  updatedAt = updatedAt,
-                                  bookSlug = "yourbook"))
+                                  updatedAt = updatedAt))
         }
       }
     }

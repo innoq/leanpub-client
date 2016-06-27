@@ -14,7 +14,6 @@ case class Coupon(couponCode: String,
                   numUses: Int,
                   createdAt: ZonedDateTime,
                   updatedAt: ZonedDateTime
-                  //bookSlug: String
                  )
 
 object Coupon {
