@@ -1,15 +1,16 @@
 name := "leanpub-client"
 organization := "com.innoq"
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
+scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-val akkaHttpVersion = "2.0.1"
+val akkaHttpVersion = "2.4.7"
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-http-core-experimental" % akkaHttpVersion,
-  "com.typesafe.akka" %% "akka-stream-experimental" % akkaHttpVersion,
+  "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
+  "com.typesafe.akka" %% "akka-stream" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-http-experimental" % akkaHttpVersion,
   "commons-codec" % "commons-codec" % "1.10",
-  "de.heikoseeberger" %% "akka-http-play-json" % "1.4.2",
+  "de.heikoseeberger" %% "akka-http-play-json" % "1.7.0",
   "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 )
 
