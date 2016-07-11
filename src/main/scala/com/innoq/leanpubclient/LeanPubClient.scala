@@ -20,13 +20,13 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
   val host: String = "https://leanpub.com"
   val urlCodec: URLCodec = new URLCodec()
 
-  private def postFormParams(uri: Uri, formParams: Map[String, String] = Map.empty): Future[Unit] = {
+  private def postFormParams(uri: Uri, formParams: Map[String, String] = Map.empty): Future[Result] = {
     val formData = FormData(formParams + ("api_key" -> apiKey))
     val request = HttpRequest(uri = uri, method = HttpMethods.POST, entity = formData.toEntity)
     http.singleRequest(request).flatMap { response => handleResponseToPost(uri, response) }
   }
 
-  private def sendJson[A](method: HttpMethod)(uri: Uri, a: A)(implicit writes: Writes[A]): Future[Unit] = {
+  private def sendJson[A](method: HttpMethod)(uri: Uri, a: A)(implicit writes: Writes[A]): Future[Result] = {
     val query = Query("api_key" -> apiKey)
     Marshal(a).to[MessageEntity].flatMap { entity =>
       val request = HttpRequest(uri = uri.withQuery(query), method = method, entity = entity)
@@ -46,9 +46,9 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     http.singleRequest(request).flatMap { response => handleResponseToGet(uri, response) }
   }
 
-  def triggerPreview(slug: String): Future[Unit] = postFormParams(Uri(s"$host/$slug/preview.json"))
+  def triggerPreview(slug: String): Future[Result] = postFormParams(Uri(s"$host/$slug/preview.json"))
 
-  def triggerPublish(slug: String, emailText: Option[String]): Future[Unit] = {
+  def triggerPublish(slug: String, emailText: Option[String]): Future[Result] = {
     val formParams = emailText match {
       case Some(text) => Map("publish[email_readers]" -> "true", "publish[release_notes]" -> urlCodec.encode(text))
       case None => Map.empty[String, String]
@@ -56,11 +56,11 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     postFormParams(Uri(s"$host/$slug/publish.json"), formParams)
   }
 
-  def createCoupon(slug: String, coupon: CreateCoupon): Future[Unit] = {
+  def createCoupon(slug: String, coupon: CreateCoupon): Future[Result] = {
     sendJson(HttpMethods.POST)(Uri(s"$host/$slug/coupons.json"), coupon)
   }
 
-  def updateCoupon(slug: String, couponCode: String, coupon: UpdateCoupon): Future[Unit] = {
+  def updateCoupon(slug: String, couponCode: String, coupon: UpdateCoupon): Future[Result] = {
     sendJson(HttpMethods.PUT)(Uri(s"$host/$slug/coupons/$couponCode.json"), coupon)
   }
 
