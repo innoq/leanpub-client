@@ -15,8 +15,8 @@ object ResponseHandler {
   private[leanpubclient] def handleResponseToPost(uri: Uri, response: HttpResponse)(implicit materializer: Materializer, ec: ExecutionContext): Future[Result] = {
     response.status match {
       case StatusCodes.OK => Unmarshal(response.entity).to[JsValue] match {
-        case o: JsObject if o.value == Map("success" -> JsBoolean(true)) => Future.successful(Success)
-        case _ => Future.successful(ClientError(uri, response.status, response.entity))
+        case o: JsObject if o.value == Map("success" -> JsBoolean(true)) => Future.successful(Result.Success)
+        case _ => Future.successful(Result.ClientError(uri, response.status, response.entity))
       }
       case code => Future.failed(UnexpectedStatusException(uri, code))
     }
