@@ -23,7 +23,7 @@ object Main extends App {
   //Await.result(client.triggerPublish("notabook77", Some("hello World")), 5.seconds)
   val response = client.getSales("notabook77")
   //val coupon = CreateCoupon("test123", List(PackageDiscount("book", 1.0)), LocalDate.of(2016, 7, 1))
-  val coupon = UpdateCoupon(Some(List(PackageDiscount("book", 3.0))), Some(LocalDate.of(2016, 1, 1)))
+  //val coupon = UpdateCoupon(Some(List(PackageDiscount("book", 3.0))), Some(LocalDate.of(2016, 1, 1)))
   //val response = client.updateCoupon("notabook77", "test123", coupon)
   //val response = client.getCoupons("notabook77")
   //val response = client.getAllIndividualPurchases("notabook77")

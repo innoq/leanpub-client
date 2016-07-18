@@ -1,5 +1,7 @@
 package com.innoq.leanpubclient
 
+import java.util.UUID
+
 import akka.http.scaladsl.HttpExt
 import akka.http.scaladsl.marshalling.Marshal
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport._
@@ -11,6 +13,12 @@ import play.api.libs.json._
 
 import scala.concurrent.{ExecutionContext, Future}
 import ResponseHandler._
+import akka.NotUsed
+import akka.http.scaladsl.Http.HostConnectionPool
+import akka.http.scaladsl.settings.ConnectionPoolSettings
+import akka.stream.scaladsl.{Flow, Sink, Source}
+
+import scala.util.{Failure, Success, Try}
 
 /**
   * Created by tina on 25.01.16.
@@ -20,30 +28,42 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
   val host: String = "https://leanpub.com"
   val urlCodec: URLCodec = new URLCodec()
 
+  private def sendRequest(request: HttpRequest): Future[HttpResponse] = {
+    val flow: Flow[(HttpRequest, Int), (Try[HttpResponse], Int), NotUsed] = http.superPool[Int]()
+    val responseFuture: Future[(Try[HttpResponse], Int)] =
+      Source.single(request -> 42)
+        .via(flow)
+        .runWith(Sink.head)
+    responseFuture.flatMap {
+      case (Success(response), _) => Future.successful(response)
+      case (Failure(error), _) => Future.failed(error)
+    }
+  }
+
   private def postFormParams(uri: Uri, formParams: Map[String, String] = Map.empty): Future[Result] = {
     val formData = FormData(formParams + ("api_key" -> apiKey))
     val request = HttpRequest(uri = uri, method = HttpMethods.POST, entity = formData.toEntity)
-    http.singleRequest(request).flatMap { response => handleResponseToPost(uri, response) }
+    sendRequest(request).flatMap { response => handleResponseToPost(uri, response) }
   }
 
   private def sendJson[A](method: HttpMethod)(uri: Uri, a: A)(implicit writes: Writes[A]): Future[Result] = {
     val query = Query("api_key" -> apiKey)
     Marshal(a).to[MessageEntity].flatMap { entity =>
       val request = HttpRequest(uri = uri.withQuery(query), method = method, entity = entity)
-      http.singleRequest(request).flatMap { response => handleResponseToPost(uri, response) }
+      sendRequest(request).flatMap { response => handleResponseToPost(uri, response) }
     }
   }
 
   private def get(uri: Uri): Future[JsValue] = {
     val query = Query("api_key" -> apiKey)
     val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.GET)
-    http.singleRequest(request).flatMap { response => handleResponseToGet(uri, response) }
+    sendRequest(request).flatMap { response => handleResponseToGet(uri, response) }
   }
 
   private def getWithPagination(uri: Uri, page: Int): Future[JsValue] = {
     val query = Query("api_key" -> apiKey, "page" -> page.toString)
     val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.GET)
-    http.singleRequest(request).flatMap { response => handleResponseToGet(uri, response) }
+    sendRequest(request).flatMap { response => handleResponseToGet(uri, response) }
   }
 
   def triggerPreview(slug: String): Future[Result] = postFormParams(Uri(s"$host/$slug/preview.json"))
