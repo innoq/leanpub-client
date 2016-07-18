@@ -3,7 +3,7 @@ organization := "com.innoq"
 scalaVersion := "2.11.8"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-val akkaHttpVersion = "2.4.7"
+val akkaHttpVersion = "2.4.8"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
