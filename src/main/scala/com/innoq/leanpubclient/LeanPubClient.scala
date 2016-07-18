@@ -1,5 +1,7 @@
 package com.innoq.leanpubclient
 
+import java.util.concurrent.TimeoutException
+
 import akka.http.scaladsl.Http.HostConnectionPool
 import akka.http.scaladsl.HttpExt
 import akka.http.scaladsl.marshalling.Marshal
@@ -14,17 +16,20 @@ import play.api.libs.json._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
+import scala.concurrent.duration._
 
 /**
   * Created by tina on 25.01.16.
   */
-class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materializer, executionContext: ExecutionContext) {
+class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuration)(implicit materializer: Materializer, executionContext: ExecutionContext) {
 
   val host: String = "leanpub.com"
   val urlCodec: URLCodec = new URLCodec()
 
   private def sendRequest(request: HttpRequest): Future[HttpResponse] = {
-    val flow: Flow[(HttpRequest, Int), (Try[HttpResponse], Int), HostConnectionPool] = http.newHostConnectionPoolHttps(host)
+    val flow: Flow[(HttpRequest, Int), (Try[HttpResponse], Int), HostConnectionPool] = http
+      .newHostConnectionPoolHttps(host)
+      .completionTimeout(requestTimeout)
     val responseFuture: Future[(Try[HttpResponse], Int)] =
       Source.single(request -> 42)
         .via(flow)
@@ -32,6 +37,10 @@ class LeanPubClient(http: HttpExt, apiKey: String)(implicit materializer: Materi
     responseFuture.flatMap {
       case (Success(response), _) => Future.successful(response)
       case (Failure(error), _) => Future.failed(error)
+    } recoverWith {
+      case error: TimeoutException =>
+        val uri = request.uri.withQuery(Query.Empty)
+        Future.failed(RequestTimeoutException(request, s"Request timed out after $requestTimeout for $uri"))
     }
   }
 
