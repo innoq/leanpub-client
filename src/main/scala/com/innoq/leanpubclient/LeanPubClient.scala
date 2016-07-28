@@ -58,13 +58,13 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
     }
   }
 
-  private def get(uri: Uri): Future[JsValue] = {
+  private def get(uri: Uri): Future[Option[JsValue]] = {
     val query = Query("api_key" -> apiKey)
     val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.GET)
     sendRequest(request).flatMap { response => handleResponseToGet(uri, response) }
   }
 
-  private def getWithPagination(uri: Uri, page: Int): Future[JsValue] = {
+  private def getWithPagination(uri: Uri, page: Int): Future[Option[JsValue]] = {
     val query = Query("api_key" -> apiKey, "page" -> page.toString)
     val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.GET)
     sendRequest(request).flatMap { response => handleResponseToGet(uri, response) }
@@ -88,32 +88,40 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
     sendJson(HttpMethods.PUT)(Uri(s"/$slug/coupons/$couponCode.json"), coupon)
   }
 
-  def getCoupons(slug: String): Future[List[Coupon]] = {
-    get(Uri(s"/$slug/coupons.json")).map { json => json.as[List[Coupon]] }
+  def getCoupons(slug: String): Future[Option[List[Coupon]]] = {
+    get(Uri(s"/$slug/coupons.json")).map { response =>
+      response.map { json => json.as[List[Coupon]] }
+    }
   }
 
-  def getSummary(slug: String): Future[BookInfo] = {
-    get(Uri(s"/$slug.json")).map { json => json.as[BookInfo] }
+  def getSummary(slug: String): Future[Option[BookInfo]] = {
+    get(Uri(s"/$slug.json")).map { response =>
+      response.map { json => json.as[BookInfo] }
+    }
   }
 
-  def getSales(slug: String): Future[Sales] = {
-    get(Uri(s"/$slug/sales.json")).map { json => json.as[Sales] }
+  def getSales(slug: String): Future[Option[Sales]] = {
+    get(Uri(s"/$slug/sales.json")).map { response =>
+      response.map { json => json.as[Sales] }
+    }
   }
 
-  def getIndividualPurchases(slug: String, page: Int = 1): Future[List[IndividualPurchase]] = {
-    getWithPagination(Uri(s"/$slug/individual_purchases.json"), page).map { json => json.as[List[IndividualPurchase]]}
+  def getIndividualPurchases(slug: String, page: Int = 1): Future[Option[List[IndividualPurchase]]] = {
+    getWithPagination(Uri(s"/$slug/individual_purchases.json"), page).map { response =>
+      response.map { json => json.as[List[IndividualPurchase]] }
+    }
   }
 
-  def getAllIndividualPurchases(slug: String): Future[List[IndividualPurchase]] = {
+  def getAllIndividualPurchases(slug: String): Future[Option[List[IndividualPurchase]]] = {
     val firstPage = getIndividualPurchases(slug, 1)
-    def loop(future: Future[List[IndividualPurchase]], accu: List[IndividualPurchase], count: Int): Future[List[IndividualPurchase]] = {
+    def loop(future: Future[Option[List[IndividualPurchase]]], accu: List[IndividualPurchase], count: Int): Future[Option[List[IndividualPurchase]]] = {
       future.flatMap { response =>
         if(response.isEmpty) {
-          Future(accu)
+          Future.successful(Option(accu))
         }
         else {
           val incrementCount = count + 1
-          loop(getIndividualPurchases(slug, incrementCount), response ::: accu, incrementCount)
+          loop(getIndividualPurchases(slug, incrementCount), response.getOrElse(List.empty) ::: accu, incrementCount)
         }
       }
     }

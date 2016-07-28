@@ -23,9 +23,10 @@ object ResponseHandler {
     }
   }
 
-  private[leanpubclient] def handleResponseToGet(uri: Uri, response: HttpResponse)(implicit materializer: Materializer, ec: ExecutionContext): Future[JsValue] = {
+  private[leanpubclient] def handleResponseToGet(uri: Uri, response: HttpResponse)(implicit materializer: Materializer, ec: ExecutionContext): Future[Option[JsValue]] = {
     response.status match {
-      case StatusCodes.OK => Unmarshal(response.entity).to[JsValue]
+      case StatusCodes.OK => Unmarshal(response.entity).to[JsValue].map { jsvalue => Option(jsvalue) }
+      case StatusCodes.NotFound => Future.successful(None)
       case code => Future.failed(UnexpectedStatusException(uri, code))
     }
   }

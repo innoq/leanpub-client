@@ -47,12 +47,12 @@ class ResponseHandlerSpec extends WordSpec with ScalaFutures {
   "The Response Handler" when {
     "handling a GET response" which {
       "has a status code 200" should {
-        "return a successful Future[JsValue]" in {
+        "return a successful Future[Option[JsValue]]" in {
           val entityValue = JsObject(Seq.empty)
           val response = HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, entityValue.toString()))
           val uri = Uri("http://example.com")
           val resultF = ResponseHandler.handleResponseToGet(uri, response)
-          assert(resultF.futureValue == JsObject(Seq.empty))
+          assert(resultF.futureValue == Option(JsObject(Seq.empty)))
         }
       }
     }
@@ -61,11 +61,11 @@ class ResponseHandlerSpec extends WordSpec with ScalaFutures {
   "The Response Handler" when {
     "handling a GET response" which {
       "has a status code 404" should {
-        "return a failed Future containing a UnexpectedStatusException" in {
+        "return a Future.successful(None)" in {
           val response = HttpResponse(status = StatusCodes.NotFound)
           val uri = Uri("http://example.com")
           val resultF = ResponseHandler.handleResponseToGet(uri, response)
-          assert(resultF.failed.futureValue == UnexpectedStatusException(uri, StatusCodes.NotFound))
+          assert(resultF.futureValue == None)
         }
       }
     }
