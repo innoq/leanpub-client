@@ -34,11 +34,11 @@ class ResponseHandlerSpec extends WordSpec with ScalaFutures {
   "The Response Handler" when {
     "handling a POST response" which {
       "has a status code 404" should {
-        "return a failed Future containing a UnexpectedStatusException" in {
+        "return a successful Future containing a NotFoundError" in {
           val response = HttpResponse(status = StatusCodes.NotFound)
           val uri = Uri("http://example.com")
           val resultF = ResponseHandler.handleResponseToPost(uri, response)
-          assert(resultF.failed.futureValue == UnexpectedStatusException(uri, StatusCodes.NotFound))
+          assert(resultF.futureValue == Result.NotFoundError(uri, StatusCodes.NotFound))
         }
       }
     }
