@@ -27,4 +27,10 @@ finally {
 }
 ```
 
+If we want to create a coupon for our book, we can do it (using the same setup) like this:
+
+```scala
+val coupon = CreateCoupon("testcoupon", List(PackageDiscount("book", 1.0)), LocalDate.of(2016, 7, 1))
+val response = client.createCoupon("myfancybook", coupon)
+```
 
