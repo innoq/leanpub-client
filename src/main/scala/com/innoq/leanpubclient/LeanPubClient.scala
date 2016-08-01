@@ -1,5 +1,6 @@
 package com.innoq.leanpubclient
 
+import java.util.UUID
 import java.util.concurrent.TimeoutException
 
 import akka.http.scaladsl.Http.HostConnectionPool
@@ -27,11 +28,11 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
   val urlCodec: URLCodec = new URLCodec()
 
   private def sendRequest(request: HttpRequest): Future[HttpResponse] = {
-    val flow: Flow[(HttpRequest, Int), (Try[HttpResponse], Int), HostConnectionPool] = http
+    val flow: Flow[(HttpRequest, UUID), (Try[HttpResponse], UUID), HostConnectionPool] = http
       .newHostConnectionPoolHttps(host)
       .completionTimeout(requestTimeout)
-    val responseFuture: Future[(Try[HttpResponse], Int)] =
-      Source.single(request -> 42)
+    val responseFuture: Future[(Try[HttpResponse], UUID)] =
+      Source.single(request -> UUID.randomUUID())
         .via(flow)
         .runWith(Sink.head)
     responseFuture.flatMap {
