@@ -65,7 +65,7 @@ class ResponseHandlerSpec extends WordSpec with ScalaFutures {
           val response = HttpResponse(status = StatusCodes.NotFound)
           val uri = Uri("http://example.com")
           val resultF = ResponseHandler.handleResponseToGet(uri, response)
-          assert(resultF.futureValue == None)
+          assert(resultF.futureValue.isEmpty)
         }
       }
     }
