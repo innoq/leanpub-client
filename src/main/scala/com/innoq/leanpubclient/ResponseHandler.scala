@@ -14,10 +14,13 @@ import scala.concurrent.{ExecutionContext, Future}
 object ResponseHandler {
   private[leanpubclient] def handleResponseToPost(uri: Uri, response: HttpResponse)(implicit materializer: Materializer, ec: ExecutionContext): Future[Result] = {
     response.status match {
-      case StatusCodes.OK => Unmarshal(response.entity).to[JsValue] match {
-        case o: JsObject if o.value == Map("success" -> JsBoolean(true)) => Future.successful(Result.Success)
-        case _ => Future.successful(Result.ClientError(uri, response.entity))
-      }
+      case StatusCodes.OK =>
+        val entity = Unmarshal(response.entity).to[JsValue]
+        entity.map { entity => entity match {
+          case o: JsObject if o.value == Map("success" -> JsBoolean(true)) => Result.Success
+          case _ => Result.ClientError(uri, response.entity)
+          }
+        }
       case StatusCodes.NotFound => Future.successful(Result.NotFoundError(uri, response.status))
       case code => Future.failed(UnexpectedStatusException(uri, code))
     }
