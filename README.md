@@ -1,9 +1,10 @@
 # Leanpub-Client
 > (find a better name. maybe) A Leanpub-API client library
 
-This client library provides an object-oriented interface to the [Leanpub API](https://leanpub.com/help/api).
-You can preview and publish your books through this library, create and update coupons and get sales information.
-Previewing a single file, polling the job status and getting the latest version of your book is not yet implemented.
+This client library provides an object-oriented interface to the [Leanpub API](https://leanpub.com/help/api)
+and is written in Scala. You can preview and publish your books through this library, create and update coupons
+and get sales information. Previewing a single file, polling the job status and getting the latest version of your
+book is not yet implemented.
 
 ## Usage Example
 
