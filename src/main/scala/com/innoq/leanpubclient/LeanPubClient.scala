@@ -10,7 +10,6 @@ import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Flow, Sink, Source}
-import akka.util.ByteString
 import com.innoq.leanpubclient.ResponseHandler._
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport._
 import org.apache.commons.codec.net.URLCodec
@@ -20,63 +19,10 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.duration._
 
-/**
-  * Created by tina on 25.01.16.
-  */
 class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuration)(implicit materializer: Materializer, executionContext: ExecutionContext) {
 
-  val host: String = "leanpub.com"
-  val urlCodec: URLCodec = new URLCodec()
-
-  private def sendRequest(request: HttpRequest): Future[HttpResponse] = {
-    val flow: Flow[(HttpRequest, UUID), (Try[HttpResponse], UUID), HostConnectionPool] = http
-      .newHostConnectionPoolHttps(host)
-      .completionTimeout(requestTimeout)
-    val responseFuture: Future[(Try[HttpResponse], UUID)] =
-      Source.single(request -> UUID.randomUUID())
-        .via(flow)
-        .runWith(Sink.head)
-    responseFuture.flatMap {
-      case (Success(response), _) => Future.successful(response)
-      case (Failure(error), _) => Future.failed(error)
-    } recoverWith {
-      case error: TimeoutException =>
-        val uri = request.uri.withQuery(Query.Empty)
-        Future.failed(RequestTimeoutException(request, s"Request timed out after $requestTimeout for $uri"))
-    }
-  }
-
-  private def postFormParams(uri: Uri, formParams: Map[String, String] = Map.empty): Future[Result] = {
-    val formData = FormData(formParams + ("api_key" -> apiKey))
-    val request = HttpRequest(uri = uri, method = HttpMethods.POST, entity = formData.toEntity)
-    sendRequest(request).flatMap { response => handleResponseToPost(uri, response) }
-  }
-
-  private def sendJson[A](method: HttpMethod)(uri: Uri, a: A)(implicit writes: Writes[A]): Future[Result] = {
-    val query = Query("api_key" -> apiKey)
-    Marshal(a).to[MessageEntity].flatMap { entity =>
-      val request = HttpRequest(uri = uri.withQuery(query), method = method, entity = entity)
-      sendRequest(request).flatMap { response => handleResponseToPost(uri, response) }
-    }
-  }
-
-  private def sendPlainText(uri: Uri, text: String): Future[Result] = {
-    val query = Query("api_key" -> apiKey)
-    val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.POST, entity = text)
-    sendRequest(request).flatMap { response => handleResponseToPost(uri, response) }
-  }
-
-  private def get(uri: Uri): Future[Option[JsValue]] = {
-    val query = Query("api_key" -> apiKey)
-    val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.GET)
-    sendRequest(request).flatMap { response => handleResponseToGet(uri, response) }
-  }
-
-  private def getWithPagination(uri: Uri, page: Int): Future[Option[JsValue]] = {
-    val query = Query("api_key" -> apiKey, "page" -> page.toString)
-    val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.GET)
-    sendRequest(request).flatMap { response => handleResponseToGet(uri, response) }
-  }
+  private val host: String = "leanpub.com"
+  private val urlCodec: URLCodec = new URLCodec()
 
   def triggerPreview(slug: String): Future[Result] = postFormParams(Uri(s"/$slug/preview.json"))
 
@@ -142,5 +88,55 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
       }
     }
     loop(firstPage, List.empty, 1)
+  }
+
+  private def postFormParams(uri: Uri, formParams: Map[String, String] = Map.empty): Future[Result] = {
+    val formData = FormData(formParams + ("api_key" -> apiKey))
+    val request = HttpRequest(uri = uri, method = HttpMethods.POST, entity = formData.toEntity)
+    sendRequest(request).flatMap { response => handleResponseToPost(uri, response) }
+  }
+
+  private def sendJson[A](method: HttpMethod)(uri: Uri, a: A)(implicit writes: Writes[A]): Future[Result] = {
+    val query = Query("api_key" -> apiKey)
+    Marshal(a).to[MessageEntity].flatMap { entity =>
+      val request = HttpRequest(uri = uri.withQuery(query), method = method, entity = entity)
+      sendRequest(request).flatMap { response => handleResponseToPost(uri, response) }
+    }
+  }
+
+  private def sendPlainText(uri: Uri, text: String): Future[Result] = {
+    val query = Query("api_key" -> apiKey)
+    val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.POST, entity = text)
+    sendRequest(request).flatMap { response => handleResponseToPost(uri, response) }
+  }
+
+  private def get(uri: Uri): Future[Option[JsValue]] = {
+    val query = Query("api_key" -> apiKey)
+    val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.GET)
+    sendRequest(request).flatMap { response => handleResponseToGet(uri, response) }
+  }
+
+  private def getWithPagination(uri: Uri, page: Int): Future[Option[JsValue]] = {
+    val query = Query("api_key" -> apiKey, "page" -> page.toString)
+    val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.GET)
+    sendRequest(request).flatMap { response => handleResponseToGet(uri, response) }
+  }
+
+  private def sendRequest(request: HttpRequest): Future[HttpResponse] = {
+    val flow: Flow[(HttpRequest, UUID), (Try[HttpResponse], UUID), HostConnectionPool] = http
+      .newHostConnectionPoolHttps(host)
+      .completionTimeout(requestTimeout)
+    val responseFuture: Future[(Try[HttpResponse], UUID)] =
+      Source.single(request -> UUID.randomUUID())
+        .via(flow)
+        .runWith(Sink.head)
+    responseFuture.flatMap {
+      case (Success(response), _) => Future.successful(response)
+      case (Failure(error), _) => Future.failed(error)
+    } recoverWith {
+      case error: TimeoutException =>
+        val uri = request.uri.withQuery(Query.Empty)
+        Future.failed(RequestTimeoutException(request, s"Request timed out after $requestTimeout for $uri"))
+    }
   }
 }
