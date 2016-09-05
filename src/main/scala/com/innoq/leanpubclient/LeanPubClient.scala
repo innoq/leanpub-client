@@ -129,14 +129,16 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
   def getAllIndividualPurchases(slug: String): Future[Option[List[IndividualPurchase]]] = {
     val firstPage = getIndividualPurchases(slug, 1)
     def loop(future: Future[Option[List[IndividualPurchase]]], accu: List[IndividualPurchase], count: Int): Future[Option[List[IndividualPurchase]]] = {
-      future.flatMap { response =>
-        if(response.isEmpty) {
-          Future.successful(Option(accu))
-        }
-        else {
-          val incrementCount = count + 1
-          loop(getIndividualPurchases(slug, incrementCount), response.getOrElse(List.empty) ::: accu, incrementCount)
-        }
+      future.flatMap {
+        case Some(page) =>
+          if (page.isEmpty) {
+            Future.successful(Option(accu))
+          }
+          else {
+            val incrementCount = count + 1
+            loop(getIndividualPurchases(slug, incrementCount), page ::: accu, incrementCount)
+          }
+        case None => Future.successful(None)
       }
     }
     loop(firstPage, List.empty, 1)

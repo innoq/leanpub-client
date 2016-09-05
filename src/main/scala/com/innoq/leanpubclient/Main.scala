@@ -28,9 +28,9 @@ object Main extends App {
     //val response = client.updateCoupon("notabook77", "fail", coupon)
     //val response = client.updateCoupon("notabook77", "test123", coupon)
     //val response = client.getCoupons("notabook77")
-    //val response = client.getAllIndividualPurchases("notabook77")
+    val response = client.getAllIndividualPurchases("notabook77")
     //val response = client.createCoupon("notabook77", coupon)
-    val response = client.triggerPreviewSingleFile("notabook77","test.txt")
+    //val response = client.triggerPreviewSingleFile("notabook12345","test.txt")
     println(Await.result(response, 5.seconds))
     //println(response)
   }
