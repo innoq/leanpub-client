@@ -26,12 +26,6 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
 
   def triggerPreview(slug: String): Future[Result] = postFormParams(Uri(s"/$slug/preview.json"))
 
-  def triggerPreviewSingleFile(slug: String, filename: String): Future[Result] = {
-    val source = scala.io.Source.fromFile(filename)
-    val text = try source.getLines.mkString("\n") finally source.close()
-    sendPlainText(Uri(s"/$slug/preview/single.json"), text)
-  }
-
   def triggerPublish(slug: String, emailText: Option[String]): Future[Result] = {
     val formParams = emailText match {
       case Some(text) => Map("publish[email_readers]" -> "true", "publish[release_notes]" -> urlCodec.encode(text))
@@ -102,12 +96,6 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
       val request = HttpRequest(uri = uri.withQuery(query), method = method, entity = entity)
       sendRequest(request).flatMap { response => handleResponseToPost(uri, response) }
     }
-  }
-
-  private def sendPlainText(uri: Uri, text: String): Future[Result] = {
-    val query = Query("api_key" -> apiKey)
-    val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.POST, entity = text)
-    sendRequest(request).flatMap { response => handleResponseToPost(uri, response) }
   }
 
   private def get(uri: Uri): Future[Option[JsValue]] = {
