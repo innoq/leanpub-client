@@ -5,7 +5,7 @@ import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
 import org.scalatest.WordSpec
 import org.scalatest.concurrent.ScalaFutures
-import play.api.libs.json.JsObject
+import play.api.libs.json.{JsBoolean, JsObject}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -20,9 +20,10 @@ class ResponseHandlerSpec extends WordSpec with ScalaFutures {
 
   "The ResponseHandler" when {
     "handling a POST response" which {
-      "has a status code 200" should {
+      "has a status code 200 and returns Json with a success message" should {
         "return a successful Future[Unit]" in {
-          val response = HttpResponse(status = StatusCodes.OK)
+          val entityValue = JsObject(Seq("success" -> JsBoolean(true)))
+          val response = HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, entityValue.toString()))
           val uri = Uri("http://example.com")
           val resultF = ResponseHandler.handleResponseToPost(uri, response)
           assert(resultF.isCompleted)
