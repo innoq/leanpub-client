@@ -3,9 +3,10 @@ package com.innoq.leanpubclient
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
+import akka.util.ByteString
 import org.scalatest.WordSpec
 import org.scalatest.concurrent.ScalaFutures
-import play.api.libs.json.{JsBoolean, JsObject}
+import play.api.libs.json.{Json, JsBoolean, JsObject}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -22,8 +23,8 @@ class ResponseHandlerSpec extends WordSpec with ScalaFutures {
     "handling a POST response" which {
       "has a status code 200 and returns Json with a success message" should {
         "return a successful Future[Unit]" in {
-          val entityValue = JsObject(Seq("success" -> JsBoolean(true)))
-          val response = HttpResponse(status = StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, entityValue.toString()))
+          val entity = HttpEntity.Strict(ContentTypes.`application/json`, ByteString(Json.stringify(Json.obj("success" -> JsBoolean(true)))))
+          val response = HttpResponse(status = StatusCodes.OK, entity = entity)
           val uri = Uri("http://example.com")
           val resultF = ResponseHandler.handleResponseToPost(uri, response)
           assert(resultF.isCompleted)
