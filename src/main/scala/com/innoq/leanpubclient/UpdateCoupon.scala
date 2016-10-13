@@ -4,9 +4,6 @@ import java.time.{LocalDate, ZonedDateTime}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-/**
-  * Created by tina on 23.05.16.
-  */
 case class UpdateCoupon(packageDiscounts: Option[List[PackageDiscount]] = None,
                         startDate: Option[LocalDate] = None,
                         endDate: Option[LocalDate] = None,

@@ -30,7 +30,6 @@ object Main extends App {
     //val response = client.getCoupons("notabook77")
     val response = client.getAllIndividualPurchases("notabook77")
     //val response = client.createCoupon("notabook77", coupon)
-    //val response = client.triggerPreviewSingleFile("notabook12345","test.txt")
     println(Await.result(response, 5.seconds))
     //println(response)
   }

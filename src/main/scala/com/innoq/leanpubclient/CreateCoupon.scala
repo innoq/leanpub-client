@@ -4,9 +4,6 @@ import java.time.LocalDate
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-/**
-  * Created by tina on 30.05.16.
-  */
 case class CreateCoupon(couponCode: String,
                         packageDiscounts: List[PackageDiscount],
                         startDate: LocalDate,

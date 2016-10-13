@@ -8,9 +8,6 @@ import play.api.libs.json._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-/**
-  * Created by tina on 15.02.16.
-  */
 object ResponseHandler {
   private[leanpubclient] def handleResponseToPost(uri: Uri, response: HttpResponse)(implicit materializer: Materializer, ec: ExecutionContext): Future[Result] = {
     response.status match {
