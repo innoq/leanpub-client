@@ -5,6 +5,7 @@ import java.time.LocalDate
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.Sink
 import play.api.libs.json.Json
 
 import scala.concurrent.Await
@@ -28,10 +29,14 @@ object Main extends App {
     //val response = client.updateCoupon("notabook77", "fail", coupon)
     //val response = client.updateCoupon("notabook77", "test123", coupon)
     //val response = client.getCoupons("notabook77")
-    val response = client.getAllIndividualPurchases("notabook77")
+    //val response = client.getAllIndividualPurchases("notabook77")
     //val response = client.createCoupon("notabook77", coupon)
-    println(Await.result(response, 5.seconds))
+    //println(Await.result(response, 5.seconds))
     //println(response)
+
+    val source = IndividualPurchasesSource(client, "book")
+    val sink = Sink.foreach(println)
+    source.runWith(sink)
   }
   finally {
     http.shutdownAllConnectionPools() andThen { case _ => system.terminate() }
