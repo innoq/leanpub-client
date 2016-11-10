@@ -34,7 +34,7 @@ object Main extends App {
     //println(Await.result(response, 5.seconds))
     //println(response)
 
-    val source = IndividualPurchasesSource(client, "book")
+    val source = IndividualPurchasesSource(client, "notabook77")
     val sink = Sink.foreach(println)
     source.runWith(sink)
   }
