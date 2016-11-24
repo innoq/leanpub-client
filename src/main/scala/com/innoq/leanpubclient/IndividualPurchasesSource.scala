@@ -14,29 +14,8 @@ class IndividualPurchasesSource(client: LeanPubClient, slug: String)(implicit ec
 
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic =
     new GraphStageLogic(shape) {
-    /*  val individualPurchase = IndividualPurchase("", "", "", None, None, ZonedDateTime.now, 0, "", None, "", "", "", "", "", ZonedDateTime.now)
-
-      def makeIndividualPurchasesList(individualPurchase: IndividualPurchase): List[IndividualPurchase] = {
-        var list: List[IndividualPurchase] = List.empty
-        for (i <- 1 to 20) {
-          list = individualPurchase :: list
-        }
-        list
-      }*/
-
       var individualPurchaseList: List[IndividualPurchase] = List.empty
       var nextPage: Int = 1
-
-/*      override def preStart(): Unit = {
-        val future = client.getIndividualPurchases(slug, nextPage)
-        val callback = getAsyncCallback[Option[List[IndividualPurchase]]] {
-          case None => completeStage()
-          case Some(purchases) =>
-            individualPurchaseList = purchases
-            nextPage += 1
-        }
-        future.foreach(callback.invoke)
-      }*/
 
       setHandler(out, new OutHandler {
         override def onPull(): Unit = {
