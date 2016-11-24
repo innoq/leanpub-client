@@ -62,7 +62,10 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
 
   def getIndividualPurchases(slug: String, page: Int = 1): Future[Option[List[IndividualPurchase]]] = {
     getWithPagination(Uri(s"/$slug/individual_purchases.json"), page).map { response =>
-      response.map { json => json.as[List[IndividualPurchase]] }
+      response.map {
+        case a: JsArray => a.as[List[IndividualPurchase]]
+        case _ => List.empty[IndividualPurchase]
+      }
     }
   }
 
