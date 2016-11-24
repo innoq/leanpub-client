@@ -27,7 +27,7 @@ class IndividualPurchasesSource(client: LeanPubClient, slug: String)(implicit ec
       var individualPurchaseList: List[IndividualPurchase] = List.empty
       var nextPage: Int = 1
 
-      override def preStart(): Unit = {
+/*      override def preStart(): Unit = {
         val future = client.getIndividualPurchases(slug, nextPage)
         val callback = getAsyncCallback[Option[List[IndividualPurchase]]] {
           case None => completeStage()
@@ -36,7 +36,7 @@ class IndividualPurchasesSource(client: LeanPubClient, slug: String)(implicit ec
             nextPage += 1
         }
         future.foreach(callback.invoke)
-      }
+      }*/
 
       setHandler(out, new OutHandler {
         override def onPull(): Unit = {
@@ -48,14 +48,14 @@ class IndividualPurchasesSource(client: LeanPubClient, slug: String)(implicit ec
               val future = client.getIndividualPurchases(slug, nextPage)
               val callback = getAsyncCallback[Option[List[IndividualPurchase]]] {
                 case None => complete(out)
-                case Some(list) => { list: List[IndividualPurchase] =>
+                case Some(list) =>
                   list match {
                     case Nil => complete(out)
-                    case purchases =>
-                      individualPurchaseList = purchases
+                    case head :: tail =>
+                      push(out, head)
+                      individualPurchaseList = tail
                       nextPage += 1
                   }
-                }
               }
               future.foreach(callback.invoke)
           }
