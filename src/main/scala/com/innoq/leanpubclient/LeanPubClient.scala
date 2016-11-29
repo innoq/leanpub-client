@@ -1,8 +1,6 @@
 package com.innoq.leanpubclient
 
-import java.util.UUID
-import java.util.concurrent.TimeoutException
-
+import akka.NotUsed
 import akka.http.scaladsl.Http.HostConnectionPool
 import akka.http.scaladsl.HttpExt
 import akka.http.scaladsl.marshalling.Marshal
@@ -14,8 +12,9 @@ import com.innoq.leanpubclient.ResponseHandler._
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport._
 import org.apache.commons.codec.net.URLCodec
 import play.api.libs.json._
+import java.util.UUID
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, TimeoutException}
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.duration._
 
@@ -69,23 +68,18 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
     }
   }
 
-  def getAllIndividualPurchases(slug: String): Future[Option[List[IndividualPurchase]]] = {
-    val firstPage = getIndividualPurchases(slug, 1)
-    def loop(future: Future[Option[List[IndividualPurchase]]], accu: List[IndividualPurchase], count: Int): Future[Option[List[IndividualPurchase]]] = {
-      future.flatMap {
-        case Some(page) =>
-          if (page.isEmpty) {
-            Future.successful(Option(accu))
-          }
-          else {
-            val incrementCount = count + 1
-            loop(getIndividualPurchases(slug, incrementCount), page ::: accu, incrementCount)
-          }
-        case None => Future.successful(None)
+  def getAllIndividualPurchases(slug: String): Source[IndividualPurchase, NotUsed] = {
+    val startPage = 1
+    Source.unfoldAsync(startPage) { pageNum =>
+      val futurePage: Future[Option[List[IndividualPurchase]]] = getIndividualPurchases(slug, pageNum)
+      val next = futurePage.map {
+        case Some(Nil) => None
+        case Some(list) => Some((pageNum + 1, list))
+        case _ => None
       }
+      next
+      }.mapConcat(identity)
     }
-    loop(firstPage, List.empty, 1)
-  }
 
   private def postFormParams(uri: Uri, formParams: Map[String, String] = Map.empty): Future[Result] = {
     val formData = FormData(formParams + ("api_key" -> apiKey))

@@ -1,12 +1,10 @@
 package com.innoq.leanpubclient
 
-import java.time.LocalDate
-
-import akka.Done
+import akka.{Done, NotUsed}
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.{Sink, Source}
 import play.api.libs.json.Json
 
 import scala.concurrent.{Await, Future}
@@ -34,7 +32,8 @@ object Main extends App {
   //println(Await.result(response, 5.seconds))
   //println(response)
 
-  val source = IndividualPurchasesSource(client, "notabook77")
+  val source = client.getAllIndividualPurchases("notabook77")
+  //val source: Source[IndividualPurchase, NotUsed] = IndividualPurchasesSource(client, "notabook77")
   val sink = Sink.foreach(println)
   val result: Future[Done] = source.runWith(sink)
   result.onComplete { _ =>
