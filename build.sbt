@@ -6,6 +6,7 @@ scalacOptions ++= Seq("-unchecked", "-deprecation")
 val akkaHttpVersion = "2.4.8"
 
 libraryDependencies ++= Seq(
+  "org.scala-lang" % "scala-reflect" % scalaVersion.value,
   "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-stream" % akkaHttpVersion,
   "com.typesafe.akka" %% "akka-http-experimental" % akkaHttpVersion,
