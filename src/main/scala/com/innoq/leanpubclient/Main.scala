@@ -32,7 +32,7 @@ object Main extends App {
   //println(Await.result(response, 5.seconds))
   //println(response)
 
-  val source = client.getAllIndividualPurchases("notabook77")
+  val source = client.getIndividualPurchaseSource("notabook77")
   //val source: Source[IndividualPurchase, NotUsed] = IndividualPurchasesSource(client, "notabook77")
   val sink = Sink.foreach(println)
   val result: Future[Done] = source.runWith(sink)

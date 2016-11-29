@@ -68,7 +68,7 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
     }
   }
 
-  def getAllIndividualPurchases(slug: String): Source[IndividualPurchase, NotUsed] = {
+  def getIndividualPurchaseSource(slug: String): Source[IndividualPurchase, NotUsed] = {
     val startPage = 1
     Source.unfoldAsync(startPage) { pageNum =>
       val futurePage: Future[Option[List[IndividualPurchase]]] = getIndividualPurchases(slug, pageNum)
