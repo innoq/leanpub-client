@@ -3,15 +3,12 @@ organization := "com.innoq"
 scalaVersion := "2.11.8"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
-val akkaHttpVersion = "2.4.8"
-
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-  "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
-  "com.typesafe.akka" %% "akka-stream" % akkaHttpVersion,
-  "com.typesafe.akka" %% "akka-http-experimental" % akkaHttpVersion,
+  "com.typesafe.akka" %% "akka-http" % "10.0.0",
+  "com.typesafe.akka" %% "akka-stream" % "2.4.14",
   "commons-codec" % "commons-codec" % "1.10",
-  "de.heikoseeberger" %% "akka-http-play-json" % "1.7.0",
+  "de.heikoseeberger" %% "akka-http-play-json" % "1.10.0",
   "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 )
 
