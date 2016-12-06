@@ -22,12 +22,12 @@ class ResponseHandlerSpec extends WordSpec with ScalaFutures {
   "The ResponseHandler" when {
     "handling a POST response" which {
       "has a status code 200 and returns Json with a success message" should {
-        "return a successful Future[Unit]" in {
+        "return a successful Future[Result.Success]" in {
           val entity = HttpEntity.Strict(ContentTypes.`application/json`, ByteString(Json.stringify(Json.obj("success" -> JsBoolean(true)))))
           val response = HttpResponse(status = StatusCodes.OK, entity = entity)
           val uri = Uri("http://example.com")
           val resultF = ResponseHandler.handleResponseToPost(uri, response)
-          assert(resultF.isCompleted)
+          assert(resultF.futureValue == Result.Success)
         }
       }
     }
