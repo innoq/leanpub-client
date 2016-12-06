@@ -14,7 +14,7 @@ object ResponseHandler {
       case StatusCodes.OK =>
         val entity = Unmarshal(response.entity).to[JsValue]
         entity.map {
-          case o: JsObject if o.value == Map("success" -> JsBoolean(true)) => Result.Success
+          case o if o == Json.obj("success" -> JsBoolean(true)) => Result.Success
           case _ => Result.ClientError(uri, response.entity)
         }
       case StatusCodes.NotFound => Future.successful(Result.NotFoundError(uri, response.status))
