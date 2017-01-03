@@ -33,7 +33,7 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
 
   /** Sends a POST request to trigger the book's publishing.
     *
-    * Triggers also the sending of an email to you book's readers if you provide an emailText.
+    * Triggers also the sending of an email to your book's readers if you provide an emailText.
     * Email sending will not be triggered if you omit the emailText param.
     *
     * @param slug, usually book's title
