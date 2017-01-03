@@ -1,7 +1,6 @@
 package com.innoq.leanpubclient
 
 import akka.NotUsed
-import akka.http.scaladsl.Http.HostConnectionPool
 import akka.http.scaladsl.HttpExt
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.Uri.Query
