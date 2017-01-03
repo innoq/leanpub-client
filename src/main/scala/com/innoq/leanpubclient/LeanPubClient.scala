@@ -22,7 +22,7 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
 
   private val host = "leanpub.com"
   private val urlCodec = new URLCodec()
-  private val hostConnectionPool: Flow[(HttpRequest, UUID), (Try[HttpResponse], UUID), HostConnectionPool] = http.newHostConnectionPoolHttps[UUID](host)
+  private val hostConnectionPool = http.newHostConnectionPoolHttps[UUID](host)
   private val flow = hostConnectionPool.completionTimeout(requestTimeout)
 
   def triggerPreview(slug: String): Future[Result] = postFormParams(Uri(s"/$slug/preview.json"))
