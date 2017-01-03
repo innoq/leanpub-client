@@ -1,5 +1,6 @@
 # Leanpub-Client
 > A Leanpub-API client library
+
 [![Build Status](https://travis-ci.org/innoq/leanpub-client.svg?branch=master)](https://travis-ci.org/innoq/leanpub-client)
 
 This client library provides an object-oriented interface to the [Leanpub API](https://leanpub.com/help/api)
