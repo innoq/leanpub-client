@@ -1,5 +1,5 @@
 # Leanpub-Client
-> (find a better name. maybe) A Leanpub-API client library
+> A Leanpub-API client library
 
 This client library provides an object-oriented interface to the [Leanpub API](https://leanpub.com/help/api)
 and is written in Scala, using the Akka HTTP client. You can preview and publish your books through this library, create and update coupons
@@ -50,6 +50,10 @@ No binaries of this project have been released yet.
 ## Contributors
 
 Tina Schönborn
+
+## License
+
+MIT 
 
 ## Copyright
 
