@@ -20,8 +20,10 @@ import scala.concurrent.duration._
 
 class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuration)(implicit materializer: Materializer, executionContext: ExecutionContext) {
 
-  private val host: String = "leanpub.com"
-  private val urlCodec: URLCodec = new URLCodec()
+  private val host = "leanpub.com"
+  private val urlCodec = new URLCodec()
+  private val hostConnectionPool: Flow[(HttpRequest, UUID), (Try[HttpResponse], UUID), HostConnectionPool] = http.newHostConnectionPoolHttps[UUID](host)
+  private val flow = hostConnectionPool.completionTimeout(requestTimeout)
 
   def triggerPreview(slug: String): Future[Result] = postFormParams(Uri(s"/$slug/preview.json"))
 
@@ -108,9 +110,6 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
   }
 
   private def sendRequest(request: HttpRequest): Future[HttpResponse] = {
-    val flow: Flow[(HttpRequest, UUID), (Try[HttpResponse], UUID), HostConnectionPool] = http
-      .newHostConnectionPoolHttps(host)
-      .completionTimeout(requestTimeout)
     val responseFuture: Future[(Try[HttpResponse], UUID)] =
       Source.single(request -> UUID.randomUUID())
         .via(flow)
@@ -119,7 +118,7 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
       case (Success(response), _) => Future.successful(response)
       case (Failure(error), _) => Future.failed(error)
     } recoverWith {
-      case error: TimeoutException =>
+      case _: TimeoutException =>
         val uri = request.uri.withQuery(Query.Empty)
         Future.failed(RequestTimeoutException(request, s"Request timed out after $requestTimeout for $uri"))
     }
