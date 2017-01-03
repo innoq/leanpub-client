@@ -4,7 +4,7 @@
 This client library provides an object-oriented interface to the [Leanpub API](https://leanpub.com/help/api)
 and is written in Scala, using the Akka HTTP client. You can preview and publish your books through this library, create and update coupons
 and get sales information. Previewing a single file, polling the job status and getting the latest version of your book is not yet implemented.
-At the moment, Scala 2.12 is not supported. Please use 2.11 instead.
+At the moment, Scala 2.12 is not supported. Please use 2.11.8 instead.
 
 ## Usage Example
 
