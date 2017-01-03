@@ -24,8 +24,22 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
   private val hostConnectionPool = http.newHostConnectionPoolHttps[UUID](host)
   private val flow = hostConnectionPool.completionTimeout(requestTimeout)
 
+  /** Sends a POST request to trigger a preview of the book.
+    *
+    * @param slug, usually book's title
+    * @return Future of type [[Result]], which can be either a Success or an Error.
+    */
   def triggerPreview(slug: String): Future[Result] = postFormParams(Uri(s"/$slug/preview.json"))
 
+  /** Sends a POST request to trigger the book's publishing.
+    *
+    * Triggers also the sending of an email to you book's readers if you provide an emailText.
+    * Email sending will not be triggered if you omit the emailText param.
+    *
+    * @param slug, usually book's title
+    * @param emailText is optional.
+    * @return Future of type [[Result]], which can be either a Success or an Error.
+    */
   def triggerPublish(slug: String, emailText: Option[String]): Future[Result] = {
     val formParams = emailText match {
       case Some(text) => Map("publish[email_readers]" -> "true", "publish[release_notes]" -> urlCodec.encode(text))
