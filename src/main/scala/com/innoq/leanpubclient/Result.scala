@@ -1,10 +1,10 @@
 package com.innoq.leanpubclient
 
-import akka.http.scaladsl.model.{ResponseEntity, StatusCode, Uri}
+import play.api.libs.json.JsValue
 
 sealed trait Result
 object Result {
   case object Success extends Result
-  case class ClientError(uri: Uri, entity: ResponseEntity) extends Result
-  case class NotFoundError(uri: Uri, code: StatusCode) extends Result
+  case class ClientError(url: String, entity: JsValue) extends Result
+  case class NotFoundError(url: String, code: Int) extends Result
 }

@@ -1,9 +1,8 @@
 package com.innoq.leanpubclient
 
-import akka.http.scaladsl.model.{Uri, StatusCode}
 
-case class UnexpectedStatusException(uri: Uri, code: StatusCode) extends Exception {
+case class UnexpectedStatusException(url: String, code: Int) extends Exception {
 
-  def message: String = s"Request to $uri failed, Statuscode: $code"
+  def message: String = s"Request to $url failed, Statuscode: $code"
 
 }
