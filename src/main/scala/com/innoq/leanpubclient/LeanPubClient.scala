@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class LeanPubClient(wsClient: StandaloneAhcWSClient, apiKey: String, requestTimeout: FiniteDuration)(implicit executionContext: ExecutionContext) {
 
-  private val host = "leanpub.com"
+  private val host = "https://leanpub.com"
 
   /** Sends a POST request to trigger a preview of the book.
     *
