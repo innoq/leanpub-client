@@ -4,6 +4,7 @@ import akka.NotUsed
 import akka.stream.scaladsl.Source
 import com.innoq.leanpubclient.ResponseHandler._
 import play.api.libs.json._
+import play.api.libs.ws.StandaloneWSRequest
 import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
 import scala.concurrent.duration._
@@ -87,8 +88,7 @@ class LeanPubClient(wsClient: StandaloneAhcWSClient, apiKey: String, requestTime
 
   private def postFormParams(url: String, formParams: Map[String, Seq[String]] = Map.empty): Future[Result] = {
     val body = formParams.updated("api_key", Seq(apiKey))
-    val request = wsClient.url(url)
-      .withRequestTimeout(requestTimeout)
+    val request = buildBasicRequest(url)
       .post(body)
     request.map { response => handleResponseToPost(url, response) }
   }
@@ -96,28 +96,25 @@ class LeanPubClient(wsClient: StandaloneAhcWSClient, apiKey: String, requestTime
   private def postJson[A](url: String, a: A)(implicit writes: Writes[A]): Future[Result] = {
     val query = "api_key" -> apiKey
     val data = Json.toJson(a)
-    val request = wsClient.url(url)
+    val request = buildBasicRequest(url)
       .withQueryString(query)
-      .withRequestTimeout(requestTimeout)
       .post(data)
-      request.map { response => handleResponseToPost(url, response) }
+    request.map { response => handleResponseToPost(url, response) }
   }
 
   private def putJson[A](url: String, a: A)(implicit writes: Writes[A]): Future[Result] = {
     val query = "api_key" -> apiKey
     val data = Json.toJson(a)
-    val request = wsClient.url(url)
+    val request = buildBasicRequest(url)
       .withQueryString(query)
-      .withRequestTimeout(requestTimeout)
       .put(data)
     request.map { response => handleResponseToPost(url, response) }
   }
 
   private def get(url: String): Future[Option[JsValue]] = {
     val query = "api_key" -> apiKey
-    val request = wsClient.url(url)
+    val request = buildBasicRequest(url)
       .withQueryString(query)
-      .withRequestTimeout(requestTimeout)
       .get()
     request.map { response => handleResponseToGet(url, response) }
   }
@@ -125,10 +122,13 @@ class LeanPubClient(wsClient: StandaloneAhcWSClient, apiKey: String, requestTime
   private def getWithPagination(url: String, page: Int): Future[Option[JsValue]] = {
     val query1 = "api_key" -> apiKey
     val query2 = "page" -> page.toString
-    val request = wsClient.url(url)
+    val request = buildBasicRequest(url)
       .withQueryString(query1, query2)
-      .withRequestTimeout(requestTimeout)
       .get()
     request.map { response => handleResponseToGet(url, response) }
+  }
+
+  private def buildBasicRequest(url: String): StandaloneWSRequest = {
+    wsClient.url(url).withRequestTimeout(requestTimeout)
   }
 }
