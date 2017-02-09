@@ -25,7 +25,6 @@ class LeanPubClient(wsClient: StandaloneAhcWSClient, apiKey: String, requestTime
     *
     * Triggers also the sending of an email to your book's readers if you provide an emailText.
     * Email sending will not be triggered if you omit the emailText param.
-    *
     * @param slug, usually book's title
     * @param emailText is optional.
     * @return Future of type [[Result]], which can be either a Success or an Error.
@@ -38,32 +37,68 @@ class LeanPubClient(wsClient: StandaloneAhcWSClient, apiKey: String, requestTime
     postFormParams(s"$host/$slug/publish.json", formParams)
   }
 
+  /** Sends a POST request to create a coupon for the given book.
+    *
+    * @param slug, usually book's title
+    * @param coupon provide a [[Coupon]] for the book
+    * @return Future of type [[Result]], which can be either a Success or an Error.
+    */
   def createCoupon(slug: String, coupon: CreateCoupon): Future[Result] = {
     postJson(s"$host/$slug/coupons.json", coupon)
   }
 
+  /** Sends a PUT request to update a coupon.
+    *
+    * @param slug, usually book's title
+    * @param couponCode name of the coupon you would like to update
+    * @param coupon [[UpdateCoupon]] contains the attributes you would like to update
+    * @return Future of type [[Result]], which can be either a Success or an Error.
+    */
   def updateCoupon(slug: String, couponCode: String, coupon: UpdateCoupon): Future[Result] = {
     putJson(s"$host/$slug/coupons/$couponCode.json", coupon)
   }
 
+  /** Sends a GET request to retrieve all coupons for a book.
+    *
+    * @param slug, usually book's title
+    * @return Future of Option which may contain a List of [[Coupon]]
+    */
   def getCoupons(slug: String): Future[Option[List[Coupon]]] = {
     get(s"$host/$slug/coupons.json").map { response =>
       response.map { json => json.as[List[Coupon]] }
     }
   }
 
+  /** Sends a GET request to retrieve general information about the book.
+    *
+    * @param slug, usually book's title
+    * @return Future of Option which may contain a [[BookInfo]] object
+    */
   def getSummary(slug: String): Future[Option[BookInfo]] = {
     get(s"$host/$slug.json").map { response =>
       response.map { json => json.as[BookInfo] }
     }
   }
 
+  /** Sends a GET request to retrieve information on a book's sales.
+    *
+    * @param slug, usually book's title
+    * @return Future of Option which may contain a [[Sales]] Object
+    */
   def getSales(slug: String): Future[Option[Sales]] = {
     get(s"$host/$slug/sales.json").map { response =>
       response.map { json => json.as[Sales] }
     }
   }
 
+  /** Sends a GET request to retrieve detailed information on a book's sales.
+    *
+    * This method only retrieves one page per method call. Please use the method
+    * [[getIndividualPurchaseSource]] if you would like to get all Individual Purchases.
+    * @param slug, usually book's title
+    * @param page page to load
+    * @return Future of Option which may contain a List of [[IndividualPurchase]]
+    */
   def getIndividualPurchases(slug: String, page: Int = 1): Future[Option[List[IndividualPurchase]]] = {
     getWithPagination(s"$host/$slug/individual_purchases.json", page).map { response =>
       response.map {
@@ -73,6 +108,12 @@ class LeanPubClient(wsClient: StandaloneAhcWSClient, apiKey: String, requestTime
     }
   }
 
+  /** Creates a source which emits objects of [[IndividualPurchase]]
+    *
+    * Use this source to retrieve detailed sales information on a given book.
+    * @param slug, usually book's title
+    * @return an akka [[Source]] of [[IndividualPurchase]]
+    */
   def getIndividualPurchaseSource(slug: String): Source[IndividualPurchase, NotUsed] = {
     val startPage = 1
     Source.unfoldAsync(startPage) { pageNum =>
