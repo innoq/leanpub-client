@@ -10,6 +10,13 @@ import play.api.libs.ws.ahc.StandaloneAhcWSClient
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
+/** LeanpubClient is a client to interact with the Leanpub-API.
+  *
+  * @param wsClient [[StandaloneAhcWSClient]] to perform http requests
+  * @param apiKey String, Leanpub-API key to access your books
+  * @param requestTimeout [[FiniteDuration]] define a request timeout time
+  * @param executionContext implicit [[ExecutionContext]] for Futures
+  */
 class LeanPubClient(wsClient: StandaloneAhcWSClient, apiKey: String, requestTimeout: FiniteDuration)(implicit executionContext: ExecutionContext) {
 
   private val host = "https://leanpub.com"
