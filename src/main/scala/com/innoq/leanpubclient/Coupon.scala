@@ -4,7 +4,7 @@ import java.time.{LocalDate, ZonedDateTime}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-/** A list of Coupons is the response of the GET request [[LeanPubClient.getCoupons()]]
+/** A list of Coupons is the response of the GET request [[LeanPubClient.getCoupons]]
   *
   * Coupons contain codes to get a discount on a certain book. They also contain information
   * on the period of time in which they are valid, the discounted price and other details.

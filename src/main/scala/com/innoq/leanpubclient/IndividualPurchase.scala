@@ -4,7 +4,25 @@ import java.time.ZonedDateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-
+/** IndividualPurchases can be retrieved by performing a GET request with [[LeanPubClient.getIndividualPurchases]]
+  * or via a source by using [[LeanPubClient.getIndividualPurchaseSource]].
+  *
+  * @param causeRoyaltyPercentage cause royalties percentage
+  * @param authorRoyaltyPercentage author royalties percentage
+  * @param authorRoyalties author royalties
+  * @param authorPaidOutAt date author will be paid
+  * @param causePaidOutAt date cause will be paid
+  * @param createdAt ???
+  * @param royaltyDaysHold days royalties will be hold
+  * @param publisherRoyalties publisher royalties
+  * @param publisherPaidOutAt date publisher will be paid
+  * @param authorUsername author username
+  * @param publisherSlug publisher slug
+  * @param userEmail user email address
+  * @param purchaseUuid purchase UUID
+  * @param invoiceId invoice Id
+  * @param datePurchased date of purchase
+  */
 case class IndividualPurchase(causeRoyaltyPercentage: String,
                              authorRoyaltyPercentage: String,
                              authorRoyalties: String,

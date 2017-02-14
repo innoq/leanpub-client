@@ -6,6 +6,8 @@ import play.api.libs.json._
 
 /** Use CreateCoupon to create a coupon for a book via [[LeanPubClient.createCoupon]]
   *
+  * You can specify different discount packages in one CreateCoupon by providing a list
+  * of [[PackageDiscount]]. Each PackageDiscount contains a package name and discounted price.
   * @param couponCode coupon name
   * @param packageDiscounts List of [[PackageDiscount]] to specify discounted price and package names
   * @param startDate start date for coupon validity
