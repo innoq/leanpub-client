@@ -26,7 +26,7 @@ import play.api.libs.json._
   * @param links collection of links, see below in companion object
   */
 case class BookInfo(slug: String,
-                    subtitle: String,
+                    subtitle: Option[String],
                     title: String,
                     about: String,
                     lastPublishedAt: ZonedDateTime,
@@ -87,7 +87,7 @@ object BookInfo {
   implicit val bookInfoReads: Reads[BookInfo] = new Reads[BookInfo] {
     override def reads(json: JsValue): JsResult[BookInfo] = for {
       slug <- (json \ "slug").validate[String]
-      subtitle <- (json \ "subtitle").validate[String]
+      subtitle <- (json \ "subtitle").validateOpt[String]
       title <- (json \ "title").validate[String]
       about <- (json \ "about_the_book").validate[String]
       lastPublishedAt <- (json \ "last_published_at").validate[ZonedDateTime]
