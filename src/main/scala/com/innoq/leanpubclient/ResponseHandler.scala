@@ -9,8 +9,8 @@ private[leanpubclient] object ResponseHandler {
       case 200 =>
         val entity = response.json
         entity match {
-          case o if o == Json.obj("success" -> JsBoolean(true)) => Result.Success
-          case _ => Result.ClientError(url, entity)
+          case o if o == Json.obj("success" -> JsBoolean(false)) => Result.ClientError(url, entity)
+          case _ => Result.Success
         }
       case 404 => Result.NotFoundError(url, response.status)
       case code => throw UnexpectedStatusException(url, code)
