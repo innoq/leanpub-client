@@ -1,6 +1,6 @@
 package com.innoq.leanpubclient
 
-import java.time.{LocalDate, ZonedDateTime}
+import java.time.LocalDate
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
