@@ -13,9 +13,9 @@ import play.api.libs.json._
   * @param packageDiscounts List of [[PackageDiscount]], contains discounted price and package name
   * @param startDate start date for coupon validity
   * @param endDate end date for coupon validity
-  * @param maxUses maximum number of uses for a coupon, null means unlimited
+  * @param maxUses maximum number of uses for a coupon, None means unlimited
   * @param note a description of the coupon
-  * @param suspended wether coupon is suspended or not
+  * @param suspended whether coupon is suspended
   * @param numUses how many times the coupon has been used
   * @param createdAt creation date
   * @param updatedAt date of update

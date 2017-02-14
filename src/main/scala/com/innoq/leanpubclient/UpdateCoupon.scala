@@ -4,6 +4,17 @@ import java.time.{LocalDate, ZonedDateTime}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
+/** Use UpdateCoupon to update a coupon for a book via [[LeanPubClient.updateCoupon]]
+  *
+  * Every parameter is optional for UpdateCoupons. See below what each parameter does
+  * and use only those you want to update.
+  * @param packageDiscounts List of [[PackageDiscount]] to specify discounted price and package names
+  * @param startDate start date for coupon validity
+  * @param endDate end date for coupon validity
+  * @param maxUses maximum number of uses for a coupon
+  * @param note a description of the coupon
+  * @param suspended whether coupon is suspended
+  */
 case class UpdateCoupon(packageDiscounts: Option[List[PackageDiscount]] = None,
                         startDate: Option[LocalDate] = None,
                         endDate: Option[LocalDate] = None,
