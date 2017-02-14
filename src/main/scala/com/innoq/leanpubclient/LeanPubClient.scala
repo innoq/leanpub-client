@@ -47,7 +47,7 @@ class LeanPubClient(wsClient: StandaloneAhcWSClient, apiKey: String, requestTime
   /** Sends a POST request to create a coupon for the given book.
     *
     * @param slug, usually book's title
-    * @param coupon provide a [[Coupon]] for the book
+    * @param coupon provide a [[CreateCoupon]] for the book
     * @return Future of type [[Result]], which can be either a Success or an Error.
     */
   def createCoupon(slug: String, coupon: CreateCoupon): Future[Result] = {
