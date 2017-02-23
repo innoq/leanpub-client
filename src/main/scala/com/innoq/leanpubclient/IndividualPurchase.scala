@@ -13,7 +13,7 @@ import play.api.libs.json._
   * @param authorRoyalties author royalties
   * @param authorPaidOutAt date author will be paid
   * @param causePaidOutAt date cause will be paid
-  * @param createdAt ???
+  * @param createdAt time and date entry was created
   * @param royaltyDaysHold days royalties will be hold
   * @param publisherRoyalties publisher royalties
   * @param publisherPaidOutAt date publisher will be paid
