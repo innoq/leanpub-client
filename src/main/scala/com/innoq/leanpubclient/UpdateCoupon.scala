@@ -2,7 +2,7 @@ package com.innoq.leanpubclient
 
 import java.time.LocalDate
 
-import com.innoq.leanpubclient.UpdateCoupon.MaxUses
+import com.innoq.leanpubclient.UpdateCoupon.{EndDate, MaxUses, Note}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -14,14 +14,14 @@ import play.api.libs.json._
   * @param startDate start date for coupon validity
   * @param endDate end date for coupon validity
   * @param maxUses maximum number of uses for a coupon
-  * @param note a description of the coupon
+  * @param note a description of the coupon. It is just used to remind you of what it was for.
   * @param suspended whether coupon is suspended
   */
 case class UpdateCoupon(packageDiscounts: Option[List[PackageDiscount]] = None,
                         startDate: Option[LocalDate] = None,
-                        endDate: Option[LocalDate] = None,
+                        endDate: Option[EndDate] = None,
                         maxUses: Option[MaxUses] = None,
-                        note: Option[String] = None,
+                        note: Option[Note] = None,
                         suspended: Option[Boolean] = None
                         )
 
@@ -38,12 +38,36 @@ object UpdateCoupon {
     }
   }
 
+  sealed trait EndDate
+  object EndDate {
+    case object NoEndDate extends EndDate
+    case class SpecificEndDate(endDate: LocalDate) extends EndDate
+
+    implicit val endDateWrites: Writes[EndDate] = Writes {
+      case NoEndDate => JsNull
+      case SpecificEndDate(endDate) =>
+        val dateString = endDate.toString
+        Json.toJson(dateString)
+    }
+  }
+
+  sealed trait Note
+  object Note {
+    case object EmptyNote extends Note
+    case class TextNote(note: String) extends Note
+
+    implicit val noteWrites: Writes[Note] = Writes {
+      case EmptyNote => JsNull
+      case TextNote(note) => Json.toJson(note)
+    }
+  }
+
   implicit val updateCouponWrites: Writes[UpdateCoupon] = (
       (JsPath \ "package_discounts_attributes").writeNullable[List[PackageDiscount]] and
       (JsPath \ "start_date").writeNullable[LocalDate] and
-      (JsPath \ "end_date").writeNullable[LocalDate] and
+      (JsPath \ "end_date").writeNullable[EndDate] and
       (JsPath \ "max_uses").writeNullable[MaxUses] and
-      (JsPath \ "note").writeNullable[String] and
+      (JsPath \ "note").writeNullable[Note] and
       (JsPath \ "suspended").writeNullable[Boolean]
     ) (unlift(UpdateCoupon.unapply))
 }
