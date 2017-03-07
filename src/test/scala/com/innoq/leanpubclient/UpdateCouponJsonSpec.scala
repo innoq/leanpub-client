@@ -1,5 +1,6 @@
 package com.innoq.leanpubclient
 
+import com.innoq.leanpubclient.UpdateCoupon.MaxUses.LimitedUses
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.WordSpec
 import play.api.libs.json._
@@ -17,7 +18,7 @@ class UpdateCouponJsonSpec extends WordSpec with TypeCheckedTripleEquals {
             "suspended": true
             }""")
 
-          val updateCoupon = UpdateCoupon(maxUses = Some(50),
+          val updateCoupon = UpdateCoupon(maxUses = Some(LimitedUses(50)),
                                           note = Some("I changed something"),
                                           suspended = Some(true)
           )
