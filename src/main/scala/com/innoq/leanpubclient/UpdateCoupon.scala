@@ -12,9 +12,9 @@ import play.api.libs.json._
   * and use only those you want to update.
   * @param packageDiscounts List of [[PackageDiscount]] to specify discounted price and package names
   * @param startDate start date for coupon validity
-  * @param endDate end date for coupon validity
-  * @param maxUses maximum number of uses for a coupon
-  * @param note a description of the coupon. It is just used to remind you of what it was for.
+  * @param endDate end date for coupon validity. Please use custom datatype [[EndDate]] to specify if you want to set or unset it
+  * @param maxUses maximum number of uses for a coupon, use custom datatype [[MaxUses]] to specify limited or unlimited use
+  * @param note a description of the coupon. It is just used to remind you of what it was for. Please use custom datatype [[Note]] to set or remove the note
   * @param suspended whether coupon is suspended
   */
 case class UpdateCoupon(packageDiscounts: Option[List[PackageDiscount]] = None,
