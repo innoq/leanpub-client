@@ -1,6 +1,7 @@
 package com.innoq.leanpubclient
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import com.innoq.leanpubclient.UpdateCoupon.{EndDate, MaxUses, Note}
 import play.api.libs.functional.syntax._
@@ -42,11 +43,12 @@ object UpdateCoupon {
   object EndDate {
     case object NoEndDate extends EndDate
     case class SpecificEndDate(endDate: LocalDate) extends EndDate
+    private val dateFormat = DateTimeFormatter.ISO_LOCAL_DATE
 
     implicit val endDateWrites: Writes[EndDate] = Writes {
       case NoEndDate => JsNull
       case SpecificEndDate(endDate) =>
-        val dateString = endDate.toString
+        val dateString = endDate.format(dateFormat)
         Json.toJson(dateString)
     }
   }
