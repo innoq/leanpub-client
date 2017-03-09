@@ -10,7 +10,7 @@ import play.api.libs.json._
   *
   * Every parameter is optional for UpdateCoupons. See below what each parameter does
   * and use only those you want to update.
-  * @param packageDiscounts List of [[PackageDiscount]] to specify discounted price and package names
+  * @param packageDiscounts adds the [[PackageDiscount]] you listed to the discounts which are already there
   * @param startDate start date for coupon validity
   * @param endDate end date for coupon validity. Please use custom datatype [[EndDate]] to specify if you want to set or unset it
   * @param maxUses maximum number of uses for a coupon, use custom datatype [[MaxUses]] to specify limited or unlimited use
