@@ -1,17 +1,14 @@
 name := "leanpub-client"
 organization := "com.innoq"
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.1"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-  "com.typesafe.akka" %% "akka-http" % "10.0.1",
   "com.typesafe.akka" %% "akka-stream" % "2.4.16",
-  "commons-codec" % "commons-codec" % "1.10",
-  "de.heikoseeberger" %% "akka-http-play-json" % "1.10.1",
-  "org.scalatest" %% "scalatest" % "2.2.6" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+  "com.typesafe.play" %% "play-json" % "2.6.0-M1",
+  "com.typesafe.play" %% "play-ahc-ws-standalone" % "1.0.0-M1"
 )
 
-resolvers += Resolver.bintrayRepo("hseeberger", "maven")
-
 cancelable in Global := true
+

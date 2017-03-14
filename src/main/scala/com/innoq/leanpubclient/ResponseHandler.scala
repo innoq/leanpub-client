@@ -1,32 +1,27 @@
 package com.innoq.leanpubclient
 
-import akka.http.scaladsl.model.{HttpResponse, StatusCodes, Uri}
-import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.Materializer
-import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport._
 import play.api.libs.json._
+import play.api.libs.ws.StandaloneWSResponse
 
-import scala.concurrent.{ExecutionContext, Future}
-
-object ResponseHandler {
-  private[leanpubclient] def handleResponseToPost(uri: Uri, response: HttpResponse)(implicit materializer: Materializer, ec: ExecutionContext): Future[Result] = {
+private[leanpubclient] object ResponseHandler {
+  private[leanpubclient] def handleResponseToPost(url: String, response: StandaloneWSResponse): Result = {
     response.status match {
-      case StatusCodes.OK =>
-        val entity = Unmarshal(response.entity).to[JsValue]
-        entity.map {
-          case o if o == Json.obj("success" -> JsBoolean(true)) => Result.Success
-          case _ => Result.ClientError(uri, response.entity)
+      case 200 =>
+        val entity = response.json
+        entity match {
+          case o if o == Json.obj("success" -> JsBoolean(false)) => Result.ClientError(url, entity)
+          case _ => Result.Success
         }
-      case StatusCodes.NotFound => Future.successful(Result.NotFoundError(uri, response.status))
-      case code => Future.failed(UnexpectedStatusException(uri, code))
+      case 404 => Result.NotFoundError(url, response.status)
+      case code => throw UnexpectedStatusException(url, code)
     }
   }
 
-  private[leanpubclient] def handleResponseToGet(uri: Uri, response: HttpResponse)(implicit materializer: Materializer, ec: ExecutionContext): Future[Option[JsValue]] = {
+  private[leanpubclient] def handleResponseToGet(url: String, response: StandaloneWSResponse): Option[JsValue] = {
     response.status match {
-      case StatusCodes.OK => Unmarshal(response.entity).to[JsValue].map { jsvalue => Option(jsvalue) }
-      case StatusCodes.NotFound => Future.successful(None)
-      case code => Future.failed(UnexpectedStatusException(uri, code))
+      case 200 => Option(response.json)
+      case 404 => None
+      case code => throw UnexpectedStatusException(url, code)
     }
   }
 }

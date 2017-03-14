@@ -6,11 +6,10 @@
 This client library provides an object-oriented interface to the [Leanpub API](https://leanpub.com/help/api)
 and is written in Scala, using the Akka HTTP client. You can preview and publish your books through this library, create and update coupons
 and get sales information. Previewing a single file, polling the job status and getting the latest version of your book is not yet implemented.
-At the moment, Scala 2.12 is not supported. Please use 2.11.8 instead.
 
 ## Usage Example
 
-To create an instance of `LeanPubClient`, we need to pass it a few things: an `akka.http.scaladsl.HttpExt`, a LeanPub API key, a request timeout, as well as
+To create an instance of `LeanPubClient`, we need to pass it a few things: an `akka.play.api.libs.ws.ahc.StandaloneAhcWSClient`, a LeanPub API key, a request timeout, as well as
 an implicit `akka.stream.Materializer` and a `scala.concurrent.ExecutionContext`.
 One recommended way of providing the API key is to read it from an environment
 variable.
@@ -26,15 +25,16 @@ implicit val system = ActorSystem()
 implicit val materializer = ActorMaterializer()
 import system.dispatcher // to get an implicit ExecutionContext
 
-val http = Http()
+val wsClient = StandaloneAhcWSClient()
 
 try {
-  val client = new LeanPubClient(http, sys.env("LEANPUB_API_KEY"), 2000.millis)
+  val client = new LeanPubClient(wsClient, sys.env("LEANPUB_API_KEY"), 2000.millis)
   val response = client.getCoupons("myfancybook")
   println(Await.result(response, 5.seconds))
 }
 finally {
-  http.shutdownAllConnectionPools() andThen { case _ => system.terminate() }
+  wsClient.close()
+  system.terminate()
 }
 ```
 
@@ -60,4 +60,4 @@ MIT
 
 ## Copyright
 
-Copyright 2016 innoQ Deutschland GmbH
+Copyright 2016-2017 innoQ Deutschland GmbH

@@ -5,8 +5,28 @@ import java.time.ZonedDateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
+/** Bookinfo provides general information on a book.
+  *
+  * @param slug, usually book's title
+  * @param subtitle the book's subtitle
+  * @param title the book's title
+  * @param about information on the book
+  * @param lastPublishedAt [[ZonedDateTime]] of last publish date
+  * @param metaDescription not necessarily there
+  * @param pageCount Int, number of pages
+  * @param pageCountPublished Int, number of pages in published version
+  * @param totalCopiesSold Int, total number of sold books
+  * @param totalRevenue Big Decimal, the book's total revenue
+  * @param wordCount Int, number of words
+  * @param wordCountPublished Int, number of words in published version
+  * @param author author name
+  * @param minimumPrice Big Decimal, minimum price which was set
+  * @param suggestedPrice Big Decimal, suggested price which was set
+  * @param possibleReaderCount number of people who sign up before book is published
+  * @param links collection of links, see below in companion object
+  */
 case class BookInfo(slug: String,
-                    subtitle: String,
+                    subtitle: Option[String],
                     title: String,
                     about: String,
                     lastPublishedAt: ZonedDateTime,
@@ -24,7 +44,23 @@ case class BookInfo(slug: String,
                     links: BookInfo.Links
                    )
 
+/** Companion object to BookInfo, contains PlayJson Reads.
+  * Also holds the BookInfo.Links case class.
+  */
 object BookInfo {
+
+  /** BookInfo.Links is a book's collection of links.
+    *
+    * @param self a book's url
+    * @param titlePage cover page url
+    * @param image cover page image url
+    * @param pdfPreview pdf preview url
+    * @param epubPreview epub preview url
+    * @param mobiPreview mobi file preview url
+    * @param pdfPublished pdf published version url
+    * @param epubPublished epub published version url
+    * @param mobiPublished mobi published version url
+    */
   case class Links(self: String,
                    titlePage: String,
                    image: String,
@@ -51,7 +87,7 @@ object BookInfo {
   implicit val bookInfoReads: Reads[BookInfo] = new Reads[BookInfo] {
     override def reads(json: JsValue): JsResult[BookInfo] = for {
       slug <- (json \ "slug").validate[String]
-      subtitle <- (json \ "subtitle").validate[String]
+      subtitle <- (json \ "subtitle").validateOpt[String]
       title <- (json \ "title").validate[String]
       about <- (json \ "about_the_book").validate[String]
       lastPublishedAt <- (json \ "last_published_at").validate[ZonedDateTime]

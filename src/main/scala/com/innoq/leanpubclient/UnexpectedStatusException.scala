@@ -1,9 +1,13 @@
 package com.innoq.leanpubclient
 
-import akka.http.scaladsl.model.{Uri, StatusCode}
+/** An UnexpectedStatusException will be thrown on a HTTP status code different from 200 or 404
+  * by [[ResponseHandler]] after a POST or GET request.
+  *
+  * @param url requested url
+  * @param code response HTTP status code
+  */
+case class UnexpectedStatusException(url: String, code: Int) extends Exception {
 
-case class UnexpectedStatusException(uri: Uri, code: StatusCode) extends Exception {
-
-  def message: String = s"Request to $uri failed, Statuscode: $code"
+  def message: String = s"Request to $url failed, Statuscode: $code"
 
 }

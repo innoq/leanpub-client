@@ -1,67 +1,113 @@
 package com.innoq.leanpubclient
 
 import akka.NotUsed
-import akka.http.scaladsl.HttpExt
-import akka.http.scaladsl.marshalling.Marshal
-import akka.http.scaladsl.model.Uri.Query
-import akka.http.scaladsl.model._
-import akka.stream.Materializer
-import akka.stream.scaladsl.{Flow, Sink, Source}
+import akka.stream.scaladsl.Source
 import com.innoq.leanpubclient.ResponseHandler._
-import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport._
-import org.apache.commons.codec.net.URLCodec
 import play.api.libs.json._
-import java.util.UUID
+import play.api.libs.ws.StandaloneWSRequest
+import play.api.libs.ws.ahc.StandaloneAhcWSClient
 
-import scala.concurrent.{ExecutionContext, Future, TimeoutException}
-import scala.util.{Failure, Success, Try}
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
-class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuration)(implicit materializer: Materializer, executionContext: ExecutionContext) {
+/** LeanpubClient is a client to interact with the Leanpub-API.
+  *
+  * @param wsClient [[StandaloneAhcWSClient]] to perform http requests
+  * @param apiKey String, Leanpub-API key to access your books
+  * @param requestTimeout [[FiniteDuration]] define a request timeout time
+  * @param executionContext implicit [[ExecutionContext]] for Futures
+  */
+class LeanPubClient(wsClient: StandaloneAhcWSClient, apiKey: String, requestTimeout: FiniteDuration)(implicit executionContext: ExecutionContext) {
 
-  private val host = "leanpub.com"
-  private val urlCodec = new URLCodec()
-  private val hostConnectionPool = http.newHostConnectionPoolHttps[UUID](host)
-  private val flow = hostConnectionPool.completionTimeout(requestTimeout)
+  private val host = "https://leanpub.com"
 
-  def triggerPreview(slug: String): Future[Result] = postFormParams(Uri(s"/$slug/preview.json"))
+  /** Sends a POST request to trigger a preview of the book.
+    *
+    * @param slug, usually book's title
+    * @return Future of type [[Result]], which can be either a Success or an Error.
+    */
+  def triggerPreview(slug: String): Future[Result] = postFormParams(s"$host/$slug/preview.json")
 
+  /** Sends a POST request to trigger the book's publishing.
+    *
+    * Triggers also the sending of an email to your book's readers if you provide an emailText.
+    * Email sending will not be triggered if you omit the emailText param.
+    * @param slug, usually book's title
+    * @param emailText is optional.
+    * @return Future of type [[Result]], which can be either a Success or an Error.
+    */
   def triggerPublish(slug: String, emailText: Option[String]): Future[Result] = {
     val formParams = emailText match {
-      case Some(text) => Map("publish[email_readers]" -> "true", "publish[release_notes]" -> urlCodec.encode(text))
-      case None => Map.empty[String, String]
+      case Some(text) => Map("publish[email_readers]" -> Seq("true"), "publish[release_notes]" -> Seq(text))
+      case None => Map.empty[String, Seq[String]]
     }
-    postFormParams(Uri(s"/$slug/publish.json"), formParams)
+    postFormParams(s"$host/$slug/publish.json", formParams)
   }
 
+  /** Sends a POST request to create a coupon for the given book.
+    *
+    * @param slug, usually book's title
+    * @param coupon provide a [[CreateCoupon]] for the book
+    * @return Future of type [[Result]], which can be either a Success or an Error.
+    */
   def createCoupon(slug: String, coupon: CreateCoupon): Future[Result] = {
-    sendJson(HttpMethods.POST)(Uri(s"/$slug/coupons.json"), coupon)
+    postJson(s"$host/$slug/coupons.json", coupon)
   }
 
+  /** Sends a PUT request to update a coupon.
+    *
+    * @param slug, usually book's title
+    * @param couponCode name of the coupon you would like to update
+    * @param coupon [[UpdateCoupon]] contains the attributes you would like to update
+    * @return Future of type [[Result]], which can be either a Success or an Error.
+    */
   def updateCoupon(slug: String, couponCode: String, coupon: UpdateCoupon): Future[Result] = {
-    sendJson(HttpMethods.PUT)(Uri(s"/$slug/coupons/$couponCode.json"), coupon)
+    putJson(s"$host/$slug/coupons/$couponCode.json", coupon)
   }
 
+  /** Sends a GET request to retrieve all coupons for a book.
+    *
+    * @param slug, usually book's title
+    * @return Future of Option which may contain a List of [[Coupon]]
+    */
   def getCoupons(slug: String): Future[Option[List[Coupon]]] = {
-    get(Uri(s"/$slug/coupons.json")).map { response =>
+    get(s"$host/$slug/coupons.json").map { response =>
       response.map { json => json.as[List[Coupon]] }
     }
   }
 
+  /** Sends a GET request to retrieve general information about the book.
+    *
+    * @param slug, usually book's title
+    * @return Future of Option which may contain a [[BookInfo]] object
+    */
   def getSummary(slug: String): Future[Option[BookInfo]] = {
-    get(Uri(s"/$slug.json")).map { response =>
+    get(s"$host/$slug.json").map { response =>
       response.map { json => json.as[BookInfo] }
     }
   }
 
+  /** Sends a GET request to retrieve information on a book's sales.
+    *
+    * @param slug, usually book's title
+    * @return Future of Option which may contain a [[Sales]] Object
+    */
   def getSales(slug: String): Future[Option[Sales]] = {
-    get(Uri(s"/$slug/sales.json")).map { response =>
+    get(s"$host/$slug/sales.json").map { response =>
       response.map { json => json.as[Sales] }
     }
   }
 
+  /** Sends a GET request to retrieve detailed information on a book's sales.
+    *
+    * This method only retrieves one page per method call. Please use the method
+    * [[getIndividualPurchaseSource]] if you would like to get all Individual Purchases.
+    * @param slug, usually book's title
+    * @param page page to load
+    * @return Future of Option which may contain a List of [[IndividualPurchase]]
+    */
   def getIndividualPurchases(slug: String, page: Int = 1): Future[Option[List[IndividualPurchase]]] = {
-    getWithPagination(Uri(s"/$slug/individual_purchases.json"), page).map { response =>
+    getWithPagination(s"$host/$slug/individual_purchases.json", page).map { response =>
       response.map {
         case a: JsArray => a.as[List[IndividualPurchase]]
         case _ => List.empty[IndividualPurchase]
@@ -69,6 +115,12 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
     }
   }
 
+  /** Creates a source which emits objects of [[IndividualPurchase]]
+    *
+    * Use this source to retrieve detailed sales information on a given book.
+    * @param slug, usually book's title
+    * @return an akka [[Source]] of [[IndividualPurchase]]
+    */
   def getIndividualPurchaseSource(slug: String): Source[IndividualPurchase, NotUsed] = {
     val startPage = 1
     Source.unfoldAsync(startPage) { pageNum =>
@@ -82,44 +134,49 @@ class LeanPubClient(http: HttpExt, apiKey: String, requestTimeout: FiniteDuratio
       }.mapConcat(identity)
     }
 
-  private def postFormParams(uri: Uri, formParams: Map[String, String] = Map.empty): Future[Result] = {
-    val formData = FormData(formParams + ("api_key" -> apiKey))
-    val request = HttpRequest(uri = uri, method = HttpMethods.POST, entity = formData.toEntity)
-    sendRequest(request).flatMap { response => handleResponseToPost(uri, response) }
+  private def postFormParams(url: String, formParams: Map[String, Seq[String]] = Map.empty): Future[Result] = {
+    val body = formParams.updated("api_key", Seq(apiKey))
+    val request = buildBasicRequest(url)
+      .post(body)
+    request.map { response => handleResponseToPost(url, response) }
   }
 
-  private def sendJson[A](method: HttpMethod)(uri: Uri, a: A)(implicit writes: Writes[A]): Future[Result] = {
-    val query = Query("api_key" -> apiKey)
-    Marshal(a).to[MessageEntity].flatMap { entity =>
-      val request = HttpRequest(uri = uri.withQuery(query), method = method, entity = entity)
-      sendRequest(request).flatMap { response => handleResponseToPost(uri, response) }
-    }
+  private def postJson[A](url: String, a: A)(implicit writes: Writes[A]): Future[Result] = {
+    val query = "api_key" -> apiKey
+    val data = Json.toJson(a)
+    val request = buildBasicRequest(url)
+      .withQueryString(query)
+      .post(data)
+    request.map { response => handleResponseToPost(url, response) }
   }
 
-  private def get(uri: Uri): Future[Option[JsValue]] = {
-    val query = Query("api_key" -> apiKey)
-    val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.GET)
-    sendRequest(request).flatMap { response => handleResponseToGet(uri, response) }
+  private def putJson[A](url: String, a: A)(implicit writes: Writes[A]): Future[Result] = {
+    val query = "api_key" -> apiKey
+    val data = Json.toJson(a)
+    val request = buildBasicRequest(url)
+      .withQueryString(query)
+      .put(data)
+    request.map { response => handleResponseToPost(url, response) }
   }
 
-  private def getWithPagination(uri: Uri, page: Int): Future[Option[JsValue]] = {
-    val query = Query("api_key" -> apiKey, "page" -> page.toString)
-    val request = HttpRequest(uri = uri.withQuery(query), method = HttpMethods.GET)
-    sendRequest(request).flatMap { response => handleResponseToGet(uri, response) }
+  private def get(url: String): Future[Option[JsValue]] = {
+    val query = "api_key" -> apiKey
+    val request = buildBasicRequest(url)
+      .withQueryString(query)
+      .get()
+    request.map { response => handleResponseToGet(url, response) }
   }
 
-  private def sendRequest(request: HttpRequest): Future[HttpResponse] = {
-    val responseFuture: Future[(Try[HttpResponse], UUID)] =
-      Source.single(request -> UUID.randomUUID())
-        .via(flow)
-        .runWith(Sink.head)
-    responseFuture.flatMap {
-      case (Success(response), _) => Future.successful(response)
-      case (Failure(error), _) => Future.failed(error)
-    } recoverWith {
-      case _: TimeoutException =>
-        val uri = request.uri.withQuery(Query.Empty)
-        Future.failed(RequestTimeoutException(request, s"Request timed out after $requestTimeout for $uri"))
-    }
+  private def getWithPagination(url: String, page: Int): Future[Option[JsValue]] = {
+    val query1 = "api_key" -> apiKey
+    val query2 = "page" -> page.toString
+    val request = buildBasicRequest(url)
+      .withQueryString(query1, query2)
+      .get()
+    request.map { response => handleResponseToGet(url, response) }
+  }
+
+  private def buildBasicRequest(url: String): StandaloneWSRequest = {
+    wsClient.url(url).withRequestTimeout(requestTimeout)
   }
 }
