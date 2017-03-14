@@ -4,20 +4,19 @@ import akka.NotUsed
 import akka.stream.scaladsl.Source
 import com.innoq.leanpubclient.ResponseHandler._
 import play.api.libs.json._
-import play.api.libs.ws.StandaloneWSRequest
-import play.api.libs.ws.ahc.StandaloneAhcWSClient
+import play.api.libs.ws.{StandaloneWSClient, StandaloneWSRequest}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
 /** LeanpubClient is a client to interact with the Leanpub-API.
   *
-  * @param wsClient [[StandaloneAhcWSClient]] to perform http requests
+  * @param wsClient an implementation of [[StandaloneWSClient]] to perform http requests
   * @param apiKey String, Leanpub-API key to access your books
   * @param requestTimeout [[FiniteDuration]] define a request timeout time
   * @param executionContext implicit [[ExecutionContext]] for Futures
   */
-class LeanPubClient(wsClient: StandaloneAhcWSClient, apiKey: String, requestTimeout: FiniteDuration)(implicit executionContext: ExecutionContext) {
+class LeanPubClient(wsClient: StandaloneWSClient, apiKey: String, requestTimeout: FiniteDuration)(implicit executionContext: ExecutionContext) {
 
   private val host = "https://leanpub.com"
 
