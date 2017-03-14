@@ -9,6 +9,13 @@ and get sales information. Previewing a single file, polling the job status and 
 
 ## Usage Example
 
+Add this to your build.sbt:
+```scala
+resolvers += "innoq" at "https://dl.bintray.com/innoq/maven"
+libraryDependencies += "com.innoq" %% "leanpub-client" % "0.1.0"
+```
+Note that the library is only available for Scala 2.12.
+
 To create an instance of `LeanPubClient`, we need to pass it a few things: an `akka.play.api.libs.ws.ahc.StandaloneAhcWSClient`, a LeanPub API key, a request timeout, as well as
 an implicit `akka.stream.Materializer` and a `scala.concurrent.ExecutionContext`.
 One recommended way of providing the API key is to read it from an environment
@@ -45,10 +52,6 @@ like this:
 val coupon = CreateCoupon("testcoupon", List(PackageDiscount("book", 1.0)), LocalDate.of(2016, 7, 1))
 val response = client.createCoupon("myfancybook", coupon)
 ```
-
-## Release status
-
-No binaries of this project have been released yet.
 
 ## Contributors
 
