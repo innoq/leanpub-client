@@ -53,6 +53,16 @@ val coupon = CreateCoupon("testcoupon", List(PackageDiscount("book", 1.0)), Loca
 val response = client.createCoupon("myfancybook", coupon)
 ```
 
+For obtaining all individual purchases of our book, we can create a source which emits individual purchases one by one. Here is an example of the usage:
+
+```scala
+val source = client.getIndividualPurchaseSource("myfancybook")
+  source.watchTermination()((_, f) => f.onComplete {_ =>    
+    wsClient.close()
+    actorSystem.terminate()
+  }).runWith(Sink.foreach(println))
+```
+
 ## Contributors
 
 Tina Schönborn
