@@ -57,10 +57,10 @@ For obtaining all individual purchases of our book, we can create a source which
 
 ```scala
 val source = client.getIndividualPurchaseSource("myfancybook")
-  source.watchTermination()((_, f) => f.onComplete {_ =>    
-    wsClient.close()
-    actorSystem.terminate()
-  }).runWith(Sink.foreach(println))
+source.watchTermination()((_, f) => f.onComplete {_ =>    
+  wsClient.close()
+  actorSystem.terminate()
+}).runWith(Sink.foreach(println))
 ```
 
 ## Contributors
