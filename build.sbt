@@ -1,4 +1,5 @@
 name := "leanpub-client"
+version := "0.1.0"
 organization := "com.innoq"
 scalaVersion := "2.12.1"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
