@@ -2,6 +2,9 @@ name := "leanpub-client"
 organization := "com.innoq"
 scalaVersion := "2.12.1"
 scalacOptions ++= Seq("-unchecked", "-deprecation")
+licenses += ("MIT",  url("https://opensource.org/licenses/MIT"))
+bintrayPackageLabels := Seq("scala")
+bintrayOrganization := Some("innoq")
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % "2.4.16",
@@ -11,4 +14,3 @@ libraryDependencies ++= Seq(
 )
 
 cancelable in Global := true
-
